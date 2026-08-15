@@ -3,6 +3,8 @@
    Estrutura e layout, escrito Mobile First:
    as regras base valem para celular; @media (min-width) escala para
    tablet (600px), desktop (900px) e telas grandes (1200px).
+
+   Convenção deste arquivo: uma propriedade por linha, sempre.
    ========================================================================= */
 
 /* -------------------- CONTAINER -------------------- */
@@ -10,7 +12,8 @@
   width: 100%;
   max-width: 1200px;
   margin-inline: auto;
-  padding-inline: 1rem;
+  padding-left: calc(1rem + env(safe-area-inset-left, 0px));
+  padding-right: calc(1rem + env(safe-area-inset-right, 0px));
 }
 
 /* -------------------- CABEÇALHO -------------------- */
@@ -19,6 +22,7 @@
   flex-direction: column;
   gap: 0.6rem;
   padding-block: 1rem 0.75rem;
+  padding-top: calc(1rem + env(safe-area-inset-top, 0px));
 }
 .cabecalho__marca {
   display: flex;
@@ -30,16 +34,15 @@
   flex-direction: column;
   gap: 0.1rem;
 }
-.cabecalho__busca { padding-bottom: 0.9rem; }
+.cabecalho__busca {
+  display: block;
+  padding-bottom: 0.9rem;
+}
 
-.navegacao-categorias {
-  display: flex;
-  overflow-x: auto;
-  scrollbar-width: none;
+.navegacao-categorias__lista {
   gap: 0.2rem;
   padding-inline: 0.5rem;
 }
-.navegacao-categorias::-webkit-scrollbar { display: none; }
 
 /* -------------------- CONTEÚDO / GRID DE PRODUTOS -------------------- */
 .conteudo {
@@ -75,46 +78,76 @@
   flex-direction: column;
   gap: 0.4rem;
 }
-.cartao-produto__rodape { margin-top: 0.3rem; }
+.cartao-produto__rodape {
+  margin-top: 0.3rem;
+}
 
 /* -------------------- BOTÃO FLUTUANTE -------------------- */
 .botao-carrinho-flutuante {
   left: 1rem;
   right: 1rem;
-  bottom: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
   justify-content: space-between;
 }
-.botao-carrinho-flutuante__texto { display: none; }
+.botao-carrinho-flutuante__texto {
+  display: none;
+}
 
-/* -------------------- MODAL DE PRODUTO (mobile = folha inferior) -------------------- */
+/* -------------------- MODAL DE PRODUTO (mobile = folha inferior) --------------------
+   O <dialog> ganha o atributo "open" quando showModal() é chamado — por
+   isso a animação de entrada usa o seletor [open] em vez da antiga
+   classe ":not(.oculto)". Usamos @keyframes (não transition) porque uma
+   transição não anima de forma confiável quando o elemento parte de
+   display:none, que é o estado padrão de um <dialog> fechado. */
 .modal-produto {
   left: 0;
   right: 0;
   bottom: 0;
   top: auto;
   max-height: 88vh;
+  max-height: 88dvh;
   width: 100%;
   border-radius: 1.6rem 1.6rem 0 0;
+}
+.modal-produto[open] {
   animation: subir-modal var(--transicao-media);
 }
 @keyframes subir-modal {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
-.modal-produto__cabecalho { padding: 2.2rem 1.5rem 1.4rem; }
-.modal-produto__corpo { padding: 1.2rem 1.5rem 1.8rem; display: flex; flex-direction: column; gap: 1.2rem; }
-.modal-produto__secao { display: flex; flex-direction: column; gap: 0.6rem; }
+.modal-produto__cabecalho {
+  padding: 2.2rem 1.5rem 1.4rem;
+}
+.modal-produto__corpo {
+  padding: 1.2rem 1.5rem calc(1.8rem + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.modal-produto__secao {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
 .modal-produto__rodape {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
   align-items: stretch;
   position: sticky;
-  bottom: -1.8rem;
-  background: var(--cor-mussarela);
+  bottom: calc(-1.8rem - env(safe-area-inset-bottom, 0px));
+  background: var(--cor-creme);
   padding-top: 0.4rem;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-.controle-quantidade { align-self: center; }
+.controle-quantidade {
+  align-self: center;
+}
 
 /* -------------------- PAINÉIS LATERAIS (mobile = tela cheia) -------------------- */
 .painel-lateral {
@@ -123,15 +156,36 @@
   bottom: 0;
   width: 100%;
   transform: translateX(100%);
-  transition: transform var(--transicao-media);
 }
-.painel-lateral:not(.oculto) { transform: translateX(0); }
+.painel-lateral[open] {
+  animation: deslizar-painel-lateral var(--transicao-media) forwards;
+}
+@keyframes deslizar-painel-lateral {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
 
-.painel-lateral__cabecalho { padding: 1rem 1.2rem; }
-.painel-lateral__corpo { padding: 1rem 1.2rem; }
-.painel-lateral__rodape { padding: 1rem 1.2rem 1.3rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.painel-lateral__cabecalho {
+  padding: 1rem 1.2rem;
+  padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+}
+.painel-lateral__corpo {
+  padding: 1rem 1.2rem calc(1rem + env(safe-area-inset-bottom, 0px));
+}
+.painel-lateral__rodape {
+  padding: 1rem 1.2rem calc(1.3rem + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
 
-.item-carrinho { padding-block: 1rem; }
+.item-carrinho {
+  padding-block: 1rem;
+}
 .item-carrinho__acoes {
   grid-column: 1 / -1;
   display: flex;
@@ -140,16 +194,45 @@
   margin-top: 0.4rem;
 }
 
-.formulario-checkout { display: flex; flex-direction: column; }
-.grupo-formulario { padding-block: 1.1rem; display: flex; flex-direction: column; gap: 0.8rem; }
-.linha-campos { display: flex; flex-direction: column; gap: 0.8rem; }
-.campos-endereco { display: flex; flex-direction: column; gap: 0.8rem; }
-.resumo-pedido { padding: 0.8rem; }
-.painel-lateral--checkout .painel-lateral__cabecalho { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.5rem; }
-.painel-lateral--checkout .painel-lateral__cabecalho h2 { text-align: center; }
+.formulario-checkout {
+  display: flex;
+  flex-direction: column;
+}
+.grupo-formulario {
+  padding-block: 1.1rem;
+}
+.linha-campos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+.campos-endereco {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+.resumo-pedido {
+  padding: 0.8rem;
+  background: var(--cor-creme-escuro);
+  border-radius: var(--raio-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.painel-lateral--checkout .painel-lateral__cabecalho {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+.painel-lateral--checkout .painel-lateral__cabecalho h2 {
+  text-align: center;
+}
 
 /* -------------------- TOAST -------------------- */
-.toast { width: calc(100% - 2rem); }
+.toast {
+  width: calc(100% - 2rem);
+}
 
 /* =========================================================================
    TABLET — a partir de 600px
@@ -160,7 +243,10 @@
     align-items: center;
     justify-content: space-between;
   }
-  .cabecalho__info { align-items: flex-end; text-align: right; }
+  .cabecalho__info {
+    align-items: flex-end;
+    text-align: right;
+  }
 
   .grade-produtos {
     grid-template-columns: repeat(2, 1fr);
@@ -169,13 +255,17 @@
   .cartao-produto {
     grid-template-columns: 1fr;
   }
-  .cartao-produto__emoji-area { min-height: 120px; }
+  .cartao-produto__emoji-area {
+    min-height: 120px;
+  }
 
   .botao-carrinho-flutuante {
     left: auto;
     width: fit-content;
   }
-  .botao-carrinho-flutuante__texto { display: inline; }
+  .botao-carrinho-flutuante__texto {
+    display: inline;
+  }
 
   .modal-produto {
     left: 50%;
@@ -185,61 +275,106 @@
     transform: translate(-50%, -50%);
     width: min(92vw, 480px);
     max-height: 85vh;
+    max-height: 85dvh;
     border-radius: var(--raio-lg);
+  }
+  .modal-produto[open] {
     animation: aparecer-modal-central var(--transicao-media);
   }
   @keyframes aparecer-modal-central {
-    from { transform: translate(-50%, -46%); opacity: 0; }
-    to { transform: translate(-50%, -50%); opacity: 1; }
+    from {
+      transform: translate(-50%, -46%);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, -50%);
+      opacity: 1;
+    }
   }
-  .modal-produto__rodape { position: static; }
+  .modal-produto__rodape {
+    position: static;
+    padding-bottom: 0;
+  }
 
   .painel-lateral {
     width: min(420px, 92vw);
-    box-shadow: -12px 0 32px rgba(30,21,18,0.22);
+    box-shadow: -12px 0 32px rgba(43, 10, 8, 0.24);
   }
 
-  .linha-campos { flex-direction: row; }
-  .linha-campos .campo { flex: 1; }
-  .campo--flex-grande { flex: 1.4; }
+  .linha-campos {
+    flex-direction: row;
+  }
+  .linha-campos .campo {
+    flex: 1;
+  }
+  .campo--flex-grande {
+    flex: 1.4;
+  }
 }
 
 /* =========================================================================
    DESKTOP — a partir de 900px
    ========================================================================= */
 @media (min-width: 900px) {
-  .container { padding-inline: 2rem; }
+  .container {
+    padding-inline: 2rem;
+  }
 
-  .cabecalho__busca { max-width: 420px; margin-inline: 0 0 0 auto; }
+  .cabecalho__busca {
+    max-width: 420px;
+    margin-inline-start: auto;
+  }
 
-  .navegacao-categorias { padding-inline: 1.5rem; justify-content: flex-start; }
-  .navegacao-categorias__botao { padding: 1.05rem 1.3rem; }
+  .navegacao-categorias__lista {
+    padding-inline: 1.5rem;
+    justify-content: flex-start;
+  }
+  .navegacao-categorias__botao {
+    padding: 1.05rem 1.3rem;
+  }
 
   .grade-produtos {
     grid-template-columns: repeat(3, 1fr);
     gap: 1.3rem;
   }
 
-  .conteudo { padding-block: 2.5rem 6rem; gap: 3rem; }
+  .conteudo {
+    padding-block: 2.5rem 6rem;
+    gap: 3rem;
+  }
 
-  .secao-categoria__titulo { font-size: 1.8rem; }
+  .secao-categoria__titulo {
+    font-size: 1.8rem;
+  }
 
-  .cartao-produto:hover .cartao-produto__emoji-area { transform: scale(1.03); }
-  .cartao-produto__emoji-area { transition: transform var(--transicao-media); }
+  .cartao-produto__emoji-area {
+    transition: transform var(--transicao-media);
+  }
+  .cartao-produto:hover .cartao-produto__emoji-area {
+    transform: scale(1.03);
+  }
 
-  .botao-carrinho-flutuante { right: 2rem; bottom: 2rem; }
+  .botao-carrinho-flutuante {
+    right: 2rem;
+    bottom: 2rem;
+  }
 }
 
 /* =========================================================================
    TELAS GRANDES — a partir de 1200px
    ========================================================================= */
 @media (min-width: 1200px) {
-  .grade-produtos { grid-template-columns: repeat(4, 1fr); }
+  .grade-produtos {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 /* =========================================================================
    ALTURA REDUZIDA (celulares em paisagem) — ajuste de usabilidade
    ========================================================================= */
 @media (max-height: 480px) and (max-width: 899px) {
-  .modal-produto { max-height: 96vh; }
+  .modal-produto {
+    max-height: 96vh;
+    max-height: 96dvh;
+  }
 }

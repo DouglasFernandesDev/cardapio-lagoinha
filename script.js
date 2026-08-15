@@ -262,17 +262,54 @@ function normalizarTexto(texto) {
   return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
+/* Converte um texto digitado pelo cliente (ex: "100,00", "1.234,56",
+   "100.00", "100") em número. Trata o formato brasileiro corretamente:
+   quando há vírgula, qualquer ponto é tratado como separador de milhar
+   e removido antes de interpretar a vírgula como separador decimal —
+   isso evita que "1.000,00" seja lido incorretamente como "1".
+   Retorna null se o texto não representar um número válido. */
+function converterTextoParaNumero(texto) {
+  if (!texto) return null;
+  let limpo = texto.replace(/[^\d,.-]/g, '');
+  if (limpo.includes(',')) {
+    limpo = limpo.replace(/\./g, '').replace(',', '.');
+  }
+  const numero = parseFloat(limpo);
+  return Number.isFinite(numero) ? numero : null;
+}
+
 function buscarProdutoPorId(produtoId) {
   return PRODUTOS.find((produto) => produto.id === produtoId);
 }
 
+/* Mostra uma notificação rápida (toast). Usa a Popover API nativa
+   (showPopover()/hidePopover()) para garantir que a mensagem sempre
+   apareça acima de qualquer <dialog> aberto — ambos são renderizados
+   na mesma camada especial do navegador (o "top layer"), e o elemento
+   mostrado mais recentemente fica por cima. Em navegadores muito
+   antigos, sem suporte à Popover API, cai num modo de reserva baseado
+   em classe CSS. */
 function mostrarToast(mensagem, tipo = '') {
   const toast = document.getElementById('toast');
-  toast.textContent = mensagem;
-  toast.className = 'toast toast--visivel' + (tipo ? ' toast--' + tipo : '');
+  const suportaPopover = typeof toast.showPopover === 'function';
+
   clearTimeout(mostrarToast._timeout);
+  toast.textContent = mensagem;
+  toast.className = 'toast' + (tipo ? ' toast--' + tipo : '');
+
+  if (suportaPopover) {
+    if (toast.matches(':popover-open')) toast.hidePopover();
+    toast.showPopover();
+  } else {
+    toast.classList.add('toast--visivel');
+  }
+
   mostrarToast._timeout = setTimeout(() => {
-    toast.classList.remove('toast--visivel');
+    if (suportaPopover) {
+      toast.hidePopover();
+    } else {
+      toast.classList.remove('toast--visivel');
+    }
   }, 3200);
 }
 
@@ -301,14 +338,18 @@ function atualizarStatusLoja() {
    ========================================================================= */
 function renderizarNavegacaoCategorias() {
   const nav = document.getElementById('navCategorias');
-  nav.innerHTML = CATEGORIAS.map((categoria, indice) => `
-    <button
-      type="button"
-      class="navegacao-categorias__botao"
-      data-categoria-alvo="categoria-${categoria.id}"
-      aria-current="${indice === 0 ? 'true' : 'false'}"
-    >${categoria.icone} ${categoria.nome}</button>
+  const itens = CATEGORIAS.map((categoria, indice) => `
+    <li>
+      <button
+        type="button"
+        class="navegacao-categorias__botao"
+        data-categoria-alvo="categoria-${categoria.id}"
+        aria-current="${indice === 0 ? 'true' : 'false'}"
+      >${categoria.icone} ${categoria.nome}</button>
+    </li>
   `).join('');
+
+  nav.innerHTML = `<ul class="navegacao-categorias__lista">${itens}</ul>`;
 
   nav.querySelectorAll('.navegacao-categorias__botao').forEach((botao) => {
     botao.addEventListener('click', () => {
@@ -323,19 +364,21 @@ function renderizarCartaoProduto(produto) {
   const prefixo = produto.variacoes.length > 1 ? 'a partir de' : 'preço';
 
   return `
-    <article class="cartao-produto" data-produto-id="${produto.id}" data-nome-busca="${normalizarTexto(produto.nome + ' ' + produto.descricao)}">
-      <div class="cartao-produto__emoji-area" aria-hidden="true">${produto.emoji}</div>
-      <div class="cartao-produto__conteudo">
-        <h3 class="cartao-produto__nome">${produto.nome}</h3>
-        <p class="cartao-produto__descricao">${produto.descricao}</p>
-        <div class="cartao-produto__rodape">
-          <span class="cartao-produto__preco"><span>${prefixo}</span>${formatarMoeda(menorPreco)}</span>
-          <button type="button" class="botao botao--adicionar-cartao" data-abrir-produto="${produto.id}">
-            + Adicionar
-          </button>
+    <li>
+      <article class="cartao-produto" data-produto-id="${produto.id}" data-nome-busca="${normalizarTexto(produto.nome + ' ' + produto.descricao)}">
+        <figure class="cartao-produto__emoji-area" aria-hidden="true">${produto.emoji}</figure>
+        <div class="cartao-produto__conteudo">
+          <h3 class="cartao-produto__nome">${produto.nome}</h3>
+          <p class="cartao-produto__descricao">${produto.descricao}</p>
+          <footer class="cartao-produto__rodape">
+            <span class="cartao-produto__preco"><span>${prefixo}</span>${formatarMoeda(menorPreco)}</span>
+            <button type="button" class="botao botao--adicionar-cartao" data-abrir-produto="${produto.id}">
+              + Adicionar
+            </button>
+          </footer>
         </div>
-      </div>
-    </article>
+      </article>
+    </li>
   `;
 }
 
@@ -349,9 +392,9 @@ function renderizarCardapio() {
     return `
       <section class="secao-categoria" id="categoria-${categoria.id}" data-categoria-secao>
         <h2 class="secao-categoria__titulo">${categoria.icone} ${categoria.nome}</h2>
-        <div class="grade-produtos">
+        <ul class="grade-produtos">
           ${produtosDaCategoria.map(renderizarCartaoProduto).join('')}
-        </div>
+        </ul>
       </section>
     `;
   }).join('');
@@ -398,7 +441,9 @@ function configurarBusca() {
 
       cartoes.forEach((cartao) => {
         const corresponde = !termo || cartao.dataset.nomeBusca.includes(termo);
-        cartao.classList.toggle('oculto', !corresponde);
+        // O <li> é quem controla a visibilidade (o cartão em si fica sem
+        // classe extra), assim a grade não deixa "buracos" de espaçamento.
+        cartao.closest('li').classList.toggle('oculto', !corresponde);
         if (corresponde) { algumVisivelNaSecao = true; algumResultado = true; }
       });
 
@@ -410,7 +455,55 @@ function configurarBusca() {
 }
 
 /* =========================================================================
-   8. MODAL DE PRODUTO
+   8. <DIALOG> — ABERTURA/FECHAMENTO SEGUROS
+   ========================================================================= */
+
+/* Abre um <dialog> com showModal(), protegendo contra o erro que o
+   navegador lançaria se ele já estivesse aberto (ex: duplo clique muito
+   rápido no botão que o aciona). */
+function abrirDialogo(dialogo) {
+  if (!dialogo.open) dialogo.showModal();
+}
+
+/* Fecha um <dialog>. close() já é seguro de chamar mesmo se o diálogo
+   não estiver aberto (não faz nada e não lança erro), mas o "if"
+   deixa a intenção explícita e evita disparar o evento "close" à toa. */
+function fecharDialogo(dialogo) {
+  if (dialogo.open) dialogo.close();
+}
+
+/* Fecha o diálogo quando o clique acontece fora da área visível dele
+   (ou seja, no ::backdrop). Comparamos as coordenadas do clique com o
+   retângulo real do elemento em vez de checar "event.target === dialogo",
+   que é uma forma menos confiável de detectar clique no backdrop entre
+   navegadores diferentes. */
+function fecharAoClicarFora(dialogo) {
+  dialogo.addEventListener('click', (evento) => {
+    const retangulo = dialogo.getBoundingClientRect();
+    const cliqueDentro = (
+      evento.clientX >= retangulo.left &&
+      evento.clientX <= retangulo.right &&
+      evento.clientY >= retangulo.top &&
+      evento.clientY <= retangulo.bottom
+    );
+    if (!cliqueDentro) dialogo.close();
+  });
+}
+
+/* Configura o comportamento comum aos três <dialog> da página: destrava
+   a rolagem do fundo assim que qualquer um deles fecha (por botão, Esc
+   ou clique fora — o evento "close" nativo cobre todos os casos) e
+   permite fechar clicando fora. */
+function configurarComportamentoDosDialogos() {
+  ['modalProduto', 'painelCarrinho', 'painelCheckout'].forEach((id) => {
+    const dialogo = document.getElementById(id);
+    dialogo.addEventListener('close', () => travarRolagemFundo(false));
+    fecharAoClicarFora(dialogo);
+  });
+}
+
+/* =========================================================================
+   9. MODAL DE PRODUTO
    ========================================================================= */
 function abrirModalProduto(produtoId) {
   const produto = buscarProdutoPorId(produtoId);
@@ -431,13 +524,15 @@ function abrirModalProduto(produtoId) {
 
   const listaVariacoes = document.getElementById('listaVariacoes');
   listaVariacoes.innerHTML = produto.variacoes.map((variacao, indice) => `
-    <label class="opcao-variacao">
-      <span class="opcao-variacao__linha-esquerda">
-        <input type="radio" name="variacaoProduto" value="${variacao.id}" ${indice === 0 ? 'checked' : ''}>
-        <span class="opcao-variacao__nome">${variacao.nome}</span>
-      </span>
-      <span class="opcao-variacao__preco">${formatarMoeda(variacao.preco)}</span>
-    </label>
+    <li class="opcao-variacao">
+      <label class="opcao-variacao__rotulo">
+        <span class="opcao-variacao__linha-esquerda">
+          <input type="radio" name="variacaoProduto" value="${variacao.id}" ${indice === 0 ? 'checked' : ''}>
+          <span class="opcao-variacao__nome">${variacao.nome}</span>
+        </span>
+        <span class="opcao-variacao__preco">${formatarMoeda(variacao.preco)}</span>
+      </label>
+    </li>
   `).join('');
 
   listaVariacoes.querySelectorAll('input[name="variacaoProduto"]').forEach((input) => {
@@ -448,16 +543,12 @@ function abrirModalProduto(produtoId) {
   });
 
   atualizarPrecoTotalModal();
-
-  document.getElementById('sobreposicaoProduto').classList.remove('oculto');
-  document.getElementById('modalProduto').classList.remove('oculto');
+  abrirDialogo(document.getElementById('modalProduto'));
   travarRolagemFundo(true);
 }
 
 function fecharModalProdutoFn() {
-  document.getElementById('sobreposicaoProduto').classList.add('oculto');
-  document.getElementById('modalProduto').classList.add('oculto');
-  travarRolagemFundo(false);
+  fecharDialogo(document.getElementById('modalProduto'));
 }
 
 function atualizarPrecoTotalModal() {
@@ -503,7 +594,7 @@ function configurarFormularioProduto() {
 }
 
 /* =========================================================================
-   9. CARRINHO
+   10. CARRINHO
    ========================================================================= */
 function calcularSubtotalCarrinho() {
   return estado.carrinho.reduce((soma, item) => soma + item.precoUnitario * item.quantidade, 0);
@@ -520,7 +611,7 @@ function atualizarIndicadoresCarrinho() {
 
 function renderizarItemCarrinho(item) {
   return `
-    <div class="item-carrinho" data-item-id="${item.idItemCarrinho}">
+    <li class="item-carrinho" data-item-id="${item.idItemCarrinho}">
       <span class="item-carrinho__emoji" aria-hidden="true">${item.emoji}</span>
       <div class="item-carrinho__info">
         <p class="item-carrinho__nome">${item.nome}</p>
@@ -536,7 +627,7 @@ function renderizarItemCarrinho(item) {
         </div>
         <button type="button" class="item-carrinho__remover" data-acao="remover">Remover</button>
       </div>
-    </div>
+    </li>
   `;
 }
 
@@ -608,57 +699,68 @@ function carregarCarrinhoLocalStorage() {
 }
 
 /* =========================================================================
-   10. ABRIR/FECHAR PAINÉIS (carrinho e checkout)
+   11. ABRIR/FECHAR PAINÉIS (carrinho e checkout)
    ========================================================================= */
 function abrirCarrinho() {
   if (estado.carrinho.length === 0) {
     mostrarToast('Seu carrinho está vazio. Adicione uma pizza! 🍕');
     return;
   }
-  document.getElementById('sobreposicaoCarrinho').classList.remove('oculto');
-  document.getElementById('painelCarrinho').classList.remove('oculto');
+  abrirDialogo(document.getElementById('painelCarrinho'));
   travarRolagemFundo(true);
 }
 
 function fecharCarrinhoFn() {
-  document.getElementById('sobreposicaoCarrinho').classList.add('oculto');
-  document.getElementById('painelCarrinho').classList.add('oculto');
-  travarRolagemFundo(false);
+  fecharDialogo(document.getElementById('painelCarrinho'));
 }
 
 function abrirCheckout() {
   fecharCarrinhoFn();
+  ocultarLinkManualWhatsApp();
   atualizarResumoCheckout();
-  document.getElementById('sobreposicaoCheckout').classList.remove('oculto');
-  document.getElementById('painelCheckout').classList.remove('oculto');
+  abrirDialogo(document.getElementById('painelCheckout'));
   travarRolagemFundo(true);
 }
 
 function fecharCheckoutFn() {
-  document.getElementById('sobreposicaoCheckout').classList.add('oculto');
-  document.getElementById('painelCheckout').classList.add('oculto');
-  travarRolagemFundo(false);
+  ocultarLinkManualWhatsApp();
+  fecharDialogo(document.getElementById('painelCheckout'));
 }
 
 /* =========================================================================
-   11. CHECKOUT — ENDEREÇO, PAGAMENTO E RESUMO
+   12. CHECKOUT — ENDEREÇO, PAGAMENTO E RESUMO
    ========================================================================= */
 function obterTipoEntregaSelecionado() {
-  return document.querySelector('input[name="tipoEntrega"]:checked').value;
+  return document.querySelector('#formCheckout input[name="tipoEntrega"]:checked').value;
 }
 
 function obterFormaPagamentoSelecionada() {
-  return document.querySelector('input[name="formaPagamento"]:checked').value;
+  return document.querySelector('#formCheckout input[name="formaPagamento"]:checked').value;
+}
+
+/* Mostra/esconde o bloco de endereço e sincroniza os campos obrigatórios
+   com o tipo de entrega selecionado. Além de esconder o <fieldset> de
+   endereço, também o desabilita (fieldset.disabled = true) quando não
+   se aplica: isso desliga nativamente todos os campos dentro dele
+   (não recebem foco, não são validados, não são enviados), reforçando
+   de forma nativa a validação manual que já fazemos em JavaScript. */
+function sincronizarCamposDeEntrega() {
+  const ehEntrega = obterTipoEntregaSelecionado() === 'entrega';
+  const fieldsetEndereco = document.getElementById('camposEndereco');
+
+  fieldsetEndereco.classList.toggle('oculto', !ehEntrega);
+  fieldsetEndereco.disabled = !ehEntrega;
+
+  ['ruaEndereco', 'numeroEndereco', 'bairroEndereco'].forEach((idCampo) => {
+    document.getElementById(idCampo).required = ehEntrega;
+  });
 }
 
 function configurarAlternanciaEntrega() {
+  sincronizarCamposDeEntrega();
   document.querySelectorAll('input[name="tipoEntrega"]').forEach((input) => {
     input.addEventListener('change', () => {
-      const ehEntrega = obterTipoEntregaSelecionado() === 'entrega';
-      document.getElementById('camposEndereco').classList.toggle('oculto', !ehEntrega);
-      document.querySelectorAll('#camposEndereco input').forEach((campo) => {
-        campo.required = ehEntrega && (campo.id === 'ruaEndereco' || campo.id === 'numeroEndereco' || campo.id === 'bairroEndereco');
-      });
+      sincronizarCamposDeEntrega();
       atualizarResumoCheckout();
     });
   });
@@ -677,10 +779,10 @@ function configurarAlternanciaPagamento() {
 function atualizarResumoCheckout() {
   const resumo = document.getElementById('resumoPedido');
   resumo.innerHTML = estado.carrinho.map((item) => `
-    <div class="resumo-pedido__linha">
+    <li class="resumo-pedido__item">
       <span class="resumo-pedido__nome">${item.quantidade}x ${item.nome} (${item.variacaoNome})</span>
       <span class="resumo-pedido__preco">${formatarMoeda(item.precoUnitario * item.quantidade)}</span>
-    </div>
+    </li>
   `).join('');
 
   const subtotal = calcularSubtotalCarrinho();
@@ -690,12 +792,18 @@ function atualizarResumoCheckout() {
 
   document.getElementById('resumoSubtotal').textContent = formatarMoeda(subtotal);
   document.getElementById('resumoTaxaEntrega').textContent = formatarMoeda(taxaEntrega);
-  document.getElementById('linhaTaxaEntrega').classList.toggle('oculto', !ehEntrega);
   document.getElementById('resumoTotal').textContent = formatarMoeda(total);
+
+  // A linha "Taxa de entrega" é um par <dt>/<dd> dentro do <dl>: para
+  // escondê-la sem quebrar o alinhamento do grid, escondemos os dois
+  // elementos individualmente (o CSS Grid ignora itens com display:none
+  // e reflui o restante automaticamente).
+  document.getElementById('rotuloTaxaEntrega').classList.toggle('oculto', !ehEntrega);
+  document.getElementById('resumoTaxaEntrega').classList.toggle('oculto', !ehEntrega);
 }
 
 /* =========================================================================
-   12. VALIDAÇÃO E ENVIO DO PEDIDO
+   13. VALIDAÇÃO E ENVIO DO PEDIDO
    ========================================================================= */
 function validarFormularioCheckout(dados) {
   if (!dados.nomeCliente) {
@@ -715,6 +823,20 @@ function validarFormularioCheckout(dados) {
   if (estado.carrinho.length === 0) {
     mostrarToast('Seu carrinho está vazio.', 'erro');
     return false;
+  }
+  if (dados.formaPagamento === 'dinheiro' && dados.trocoPara) {
+    const valorTroco = converterTextoParaNumero(dados.trocoPara);
+    const ehEntrega = dados.tipoEntrega === 'entrega';
+    const totalPedido = calcularSubtotalCarrinho() + (ehEntrega ? CONFIGURACAO.taxaEntrega : 0);
+
+    if (valorTroco === null) {
+      mostrarToast('Informe um valor de troco válido, ex: 100,00.', 'erro');
+      return false;
+    }
+    if (valorTroco < totalPedido) {
+      mostrarToast(`O troco deve ser para um valor maior que o total do pedido (${formatarMoeda(totalPedido)}).`, 'erro');
+      return false;
+    }
   }
   return true;
 }
@@ -773,6 +895,46 @@ function montarMensagemWhatsApp(dados) {
   return partes.join('\n');
 }
 
+/* Abre o WhatsApp criando e "clicando" num link real (<a target="_blank">)
+   em vez de usar window.open(). Isso evita a maioria dos bloqueios de
+   pop-up dos navegadores, que costumam mirar especificamente chamadas de
+   window.open() e não a navegação por um link. Retorna true/false apenas
+   para log interno — a garantia real de que o cliente consiga enviar o
+   pedido vem do link manual de apoio (ver exibirLinkManualWhatsApp). */
+function abrirWhatsApp(url) {
+  try {
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    return true;
+  } catch (erro) {
+    console.warn('Não foi possível abrir o WhatsApp automaticamente:', erro);
+    return false;
+  }
+}
+
+/* Mostra um botão de apoio, sempre visível após o envio, com o link
+   pronto do pedido. Garante que o cliente NUNCA fique sem conseguir
+   enviar o pedido, mesmo se a abertura automática for bloqueada pelo
+   navegador (comum em Safari/iOS e em navegadores dentro de apps como
+   Instagram/Facebook). O link já contém a mensagem completa do pedido,
+   então continua válido mesmo depois do carrinho ser limpo. */
+function exibirLinkManualWhatsApp(url) {
+  const link = document.getElementById('linkManualWhatsapp');
+  link.href = url;
+  link.classList.remove('oculto');
+}
+
+function ocultarLinkManualWhatsApp() {
+  const link = document.getElementById('linkManualWhatsapp');
+  link.classList.add('oculto');
+  link.href = '#';
+}
+
 function configurarEnvioFormularioCheckout() {
   document.getElementById('formCheckout').addEventListener('submit', (evento) => {
     evento.preventDefault();
@@ -796,51 +958,63 @@ function configurarEnvioFormularioCheckout() {
 
     const mensagem = montarMensagemWhatsApp(dados);
     const url = `https://wa.me/${CONFIGURACAO.numeroWhatsapp}?text=${encodeURIComponent(mensagem)}`;
-    window.open(url, '_blank', 'noopener');
 
-    mostrarToast('Pedido pronto! Confirme o envio no WhatsApp. 🍕✅', 'sucesso');
+    const abriuAutomaticamente = abrirWhatsApp(url);
 
+    // O link manual fica sempre visível após o envio — mesmo quando a
+    // abertura automática funciona — como uma rede de segurança caso o
+    // cliente feche a aba do WhatsApp sem enviar por engano.
+    exibirLinkManualWhatsApp(url);
+
+    mostrarToast(
+      abriuAutomaticamente
+        ? 'Pedido pronto! Confirme o envio na aba do WhatsApp que abrimos. 🍕✅'
+        : 'Pedido pronto! Toque no botão dourado abaixo para enviar pelo WhatsApp. 🍕✅',
+      'sucesso'
+    );
+
+    // É seguro limpar o carrinho agora: a mensagem completa do pedido já
+    // está guardada na URL do link manual, então o cliente não perde nada
+    // mesmo se a abertura automática tiver falhado.
     estado.carrinho = [];
     salvarCarrinhoLocalStorage();
     renderizarCarrinho();
     atualizarIndicadoresCarrinho();
-    fecharCheckoutFn();
+
     formulario.reset();
-    document.getElementById('camposEndereco').classList.remove('oculto');
+    sincronizarCamposDeEntrega();
     document.getElementById('campoTroco').classList.remove('oculto');
     document.getElementById('avisoPix').classList.add('oculto');
+
+    // Importante: NÃO fechamos o painel de checkout automaticamente aqui.
+    // Se fechássemos, o botão de apoio (linkManualWhatsapp) ficaria
+    // escondido junto com o painel, e o cliente perderia a única forma de
+    // reenviar o pedido caso a abertura automática tenha sido bloqueada.
+    // O cliente fecha o painel manualmente (✕) quando tiver concluído o
+    // envio no WhatsApp.
   });
 }
 
 /* =========================================================================
-   13. EVENTOS GERAIS DE INTERFACE
+   14. EVENTOS GERAIS DE INTERFACE
    ========================================================================= */
 function configurarEventosGerais() {
   document.getElementById('botaoCarrinhoFlutuante').addEventListener('click', abrirCarrinho);
   document.getElementById('fecharCarrinho').addEventListener('click', fecharCarrinhoFn);
-  document.getElementById('sobreposicaoCarrinho').addEventListener('click', fecharCarrinhoFn);
-
   document.getElementById('fecharModalProduto').addEventListener('click', fecharModalProdutoFn);
-  document.getElementById('sobreposicaoProduto').addEventListener('click', fecharModalProdutoFn);
-
   document.getElementById('botaoIrParaCheckout').addEventListener('click', abrirCheckout);
   document.getElementById('fecharCheckout').addEventListener('click', fecharCheckoutFn);
-  document.getElementById('sobreposicaoCheckout').addEventListener('click', fecharCheckoutFn);
   document.getElementById('voltarParaCarrinho').addEventListener('click', () => {
     fecharCheckoutFn();
     abrirCarrinho();
   });
 
-  document.addEventListener('keydown', (evento) => {
-    if (evento.key !== 'Escape') return;
-    fecharModalProdutoFn();
-    fecharCarrinhoFn();
-    fecharCheckoutFn();
-  });
+  // Não é preciso mais escutar a tecla Esc manualmente: o <dialog>
+  // nativo já fecha sozinho com Esc (dispara "cancel" e depois "close").
 }
 
 /* =========================================================================
-   14. INICIALIZAÇÃO
+   15. INICIALIZAÇÃO
    ========================================================================= */
 function inicializarAplicacao() {
   carregarCarrinhoLocalStorage();
@@ -848,6 +1022,7 @@ function inicializarAplicacao() {
   renderizarCardapio();
   observarCategoriasVisiveis();
   configurarBusca();
+  configurarComportamentoDosDialogos();
   configurarControlesQuantidadeModal();
   configurarFormularioProduto();
   configurarAlternanciaEntrega();
