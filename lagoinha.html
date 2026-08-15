@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1E1512">
+<title>Pizzaria Nonna Bella — Cardápio Digital</title>
+<meta name="description" content="Peça sua pizza artesanal favorita e receba no conforto de casa. Cardápio digital com carrinho e finalização direto pelo WhatsApp.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500;1,9..144,700&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍕</text></svg>">
+
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+
+<a class="pular-para-conteudo" href="#conteudoPrincipal">Pular para o cardápio</a>
+
+<!-- ===================== CABEÇALHO ===================== -->
+<header class="cabecalho" id="cabecalho">
+  <div class="cabecalho__faixa-superior">
+    <div class="cabecalho__conteudo container">
+      <div class="cabecalho__marca">
+        <span class="cabecalho__logo" aria-hidden="true">🍕</span>
+        <div class="cabecalho__textos">
+          <h1 class="cabecalho__titulo">Nonna Bella</h1>
+          <p class="cabecalho__subtitulo">Pizzaria Artesanal &amp; Forno a Lenha</p>
+        </div>
+      </div>
+
+      <div class="cabecalho__info">
+        <p class="cabecalho__status" id="statusLoja">
+          <span class="cabecalho__ponto-status" id="pontoStatus" aria-hidden="true"></span>
+          <span id="textoStatus">Aberto agora</span>
+        </p>
+        <p class="cabecalho__horario">Todos os dias · 18h às 23h30</p>
+      </div>
+    </div>
+
+    <div class="cabecalho__busca container">
+      <label class="campo-busca" for="buscaProduto">
+        <span class="campo-busca__icone" aria-hidden="true">🔎</span>
+        <input type="search" id="buscaProduto" class="campo-busca__input" placeholder="Buscar por sabor, ex: calabresa, chocolate..." autocomplete="off">
+      </label>
+    </div>
+  </div>
+
+  <nav class="navegacao-categorias" id="navCategorias" aria-label="Categorias do cardápio">
+    <!-- gerado via JavaScript -->
+  </nav>
+</header>
+
+<!-- ===================== CONTEÚDO / PRODUTOS ===================== -->
+<main class="conteudo container" id="conteudoPrincipal">
+  <div id="listaCategorias"><!-- seções de categorias geradas via JavaScript --></div>
+
+  <p class="mensagem-sem-resultado oculto" id="mensagemSemResultado">
+    Nenhum item encontrado para essa busca. Tente outro termo 🍕
+  </p>
+</main>
+
+<footer class="rodape">
+  <div class="rodape__conteudo container">
+    <p>Pizzaria Nonna Bella — Feito com massa de fermentação natural e muito carinho.</p>
+    <p class="rodape__legal">Pedidos processados via WhatsApp. Cardápio sujeito a alteração sem aviso prévio.</p>
+  </div>
+</footer>
+
+<!-- ===================== BOTÃO FLUTUANTE DO CARRINHO ===================== -->
+<button class="botao-carrinho-flutuante oculto" id="botaoCarrinhoFlutuante" type="button" aria-label="Abrir carrinho de compras">
+  <span class="botao-carrinho-flutuante__icone" aria-hidden="true">🛒</span>
+  <span class="botao-carrinho-flutuante__texto">Ver carrinho</span>
+  <span class="botao-carrinho-flutuante__contador" id="contadorCarrinho">0</span>
+  <span class="botao-carrinho-flutuante__total" id="totalCarrinhoFlutuante">R$ 0,00</span>
+</button>
+
+<!-- ===================== MODAL: DETALHE DO PRODUTO ===================== -->
+<div class="sobreposicao oculto" id="sobreposicaoProduto"></div>
+<section class="modal-produto oculto" id="modalProduto" role="dialog" aria-modal="true" aria-labelledby="modalProdutoTitulo">
+  <button class="modal-produto__fechar" id="fecharModalProduto" type="button" aria-label="Fechar">✕</button>
+
+  <div class="modal-produto__cabecalho">
+    <span class="modal-produto__emoji" id="modalProdutoEmoji" aria-hidden="true"></span>
+    <h2 class="modal-produto__titulo" id="modalProdutoTitulo"></h2>
+    <p class="modal-produto__descricao" id="modalProdutoDescricao"></p>
+  </div>
+
+  <form class="modal-produto__corpo" id="formModalProduto">
+    <fieldset class="modal-produto__secao" id="secaoVariacoes">
+      <legend class="modal-produto__rotulo">Escolha o tamanho</legend>
+      <div class="lista-variacoes" id="listaVariacoes"><!-- gerado via JavaScript --></div>
+    </fieldset>
+
+    <div class="modal-produto__secao">
+      <label class="modal-produto__rotulo" for="observacaoProduto">Alguma observação? (opcional)</label>
+      <textarea id="observacaoProduto" class="modal-produto__textarea" placeholder="Ex: sem cebola, caprichar no orégano..." maxlength="140" rows="2"></textarea>
+    </div>
+
+    <div class="modal-produto__rodape">
+      <div class="controle-quantidade" role="group" aria-label="Quantidade">
+        <button type="button" class="controle-quantidade__botao" id="diminuirQuantidade" aria-label="Diminuir quantidade">−</button>
+        <span class="controle-quantidade__valor" id="valorQuantidade">1</span>
+        <button type="button" class="controle-quantidade__botao" id="aumentarQuantidade" aria-label="Aumentar quantidade">+</button>
+      </div>
+      <button type="submit" class="botao botao--primario modal-produto__adicionar" id="botaoAdicionarCarrinho">
+        Adicionar · <span id="precoTotalModal">R$ 0,00</span>
+      </button>
+    </div>
+  </form>
+</section>
+
+<!-- ===================== PAINEL: CARRINHO ===================== -->
+<div class="sobreposicao oculto" id="sobreposicaoCarrinho"></div>
+<aside class="painel-lateral" id="painelCarrinho" aria-label="Carrinho de compras">
+  <header class="painel-lateral__cabecalho">
+    <h2>Seu carrinho</h2>
+    <button class="painel-lateral__fechar" id="fecharCarrinho" type="button" aria-label="Fechar carrinho">✕</button>
+  </header>
+
+  <div class="painel-lateral__corpo" id="listaItensCarrinho">
+    <!-- itens gerados via JavaScript -->
+  </div>
+
+  <div class="painel-carrinho__vazio oculto" id="carrinhoVazio">
+    <span aria-hidden="true">🛒</span>
+    <p>Seu carrinho está vazio.</p>
+    <p class="painel-carrinho__vazio-dica">Adicione uma pizza deliciosa do cardápio!</p>
+  </div>
+
+  <footer class="painel-lateral__rodape" id="rodapeCarrinho">
+    <div class="linha-resumo">
+      <span>Subtotal</span>
+      <strong id="subtotalCarrinho">R$ 0,00</strong>
+    </div>
+    <p class="painel-lateral__aviso">Taxa de entrega calculada no checkout.</p>
+    <button class="botao botao--primario botao--bloco" id="botaoIrParaCheckout" type="button">
+      Continuar para o checkout
+    </button>
+  </footer>
+</aside>
+
+<!-- ===================== PAINEL: CHECKOUT ===================== -->
+<div class="sobreposicao oculto" id="sobreposicaoCheckout"></div>
+<aside class="painel-lateral painel-lateral--checkout" id="painelCheckout" aria-label="Finalizar pedido">
+  <header class="painel-lateral__cabecalho">
+    <button class="painel-lateral__voltar" id="voltarParaCarrinho" type="button" aria-label="Voltar ao carrinho">←</button>
+    <h2>Finalizar pedido</h2>
+    <button class="painel-lateral__fechar" id="fecharCheckout" type="button" aria-label="Fechar checkout">✕</button>
+  </header>
+
+  <form class="painel-lateral__corpo formulario-checkout" id="formCheckout" novalidate>
+
+    <div class="grupo-formulario">
+      <h3 class="grupo-formulario__titulo">1. Seus dados</h3>
+      <label class="campo" for="nomeCliente">
+        Nome completo
+        <input type="text" id="nomeCliente" name="nomeCliente" required placeholder="Como podemos te chamar?">
+      </label>
+      <label class="campo" for="telefoneCliente">
+        WhatsApp para contato
+        <input type="tel" id="telefoneCliente" name="telefoneCliente" required placeholder="(21) 99999-9999" inputmode="tel">
+      </label>
+    </div>
+
+    <div class="grupo-formulario">
+      <h3 class="grupo-formulario__titulo">2. Entrega</h3>
+      <div class="opcoes-segmentadas" role="radiogroup" aria-label="Tipo de entrega">
+        <label class="opcao-segmentada">
+          <input type="radio" name="tipoEntrega" value="entrega" checked>
+          <span>🛵 Entrega</span>
+        </label>
+        <label class="opcao-segmentada">
+          <input type="radio" name="tipoEntrega" value="retirada">
+          <span>🏠 Retirar no local</span>
+        </label>
+      </div>
+
+      <div id="camposEndereco" class="campos-endereco">
+        <label class="campo campo--flex-grande" for="ruaEndereco">
+          Rua / Avenida
+          <input type="text" id="ruaEndereco" name="ruaEndereco" placeholder="Ex: Rua das Palmeiras">
+        </label>
+        <div class="linha-campos">
+          <label class="campo" for="numeroEndereco">
+            Número
+            <input type="text" id="numeroEndereco" name="numeroEndereco" placeholder="123" inputmode="numeric">
+          </label>
+          <label class="campo campo--flex-grande" for="bairroEndereco">
+            Bairro
+            <input type="text" id="bairroEndereco" name="bairroEndereco" placeholder="Centro">
+          </label>
+        </div>
+        <label class="campo" for="complementoEndereco">
+          Complemento <span class="campo__opcional">(opcional)</span>
+          <input type="text" id="complementoEndereco" name="complementoEndereco" placeholder="Apto, bloco, casa...">
+        </label>
+        <label class="campo" for="referenciaEndereco">
+          Ponto de referência <span class="campo__opcional">(opcional)</span>
+          <input type="text" id="referenciaEndereco" name="referenciaEndereco" placeholder="Perto de...">
+        </label>
+      </div>
+    </div>
+
+    <div class="grupo-formulario">
+      <h3 class="grupo-formulario__titulo">3. Pagamento</h3>
+      <div class="opcoes-pagamento" role="radiogroup" aria-label="Forma de pagamento">
+        <label class="opcao-pagamento">
+          <input type="radio" name="formaPagamento" value="dinheiro" checked>
+          <span>💵 Dinheiro</span>
+        </label>
+        <label class="opcao-pagamento">
+          <input type="radio" name="formaPagamento" value="cartao">
+          <span>💳 Cartão na entrega</span>
+        </label>
+        <label class="opcao-pagamento">
+          <input type="radio" name="formaPagamento" value="pix">
+          <span>📱 Pix</span>
+        </label>
+      </div>
+
+      <label class="campo" id="campoTroco" for="trocoPara">
+        Precisa de troco para quanto? <span class="campo__opcional">(opcional)</span>
+        <input type="text" id="trocoPara" name="trocoPara" placeholder="Ex: 100,00" inputmode="decimal">
+      </label>
+
+      <p class="aviso-pix oculto" id="avisoPix">A chave Pix será informada pela pizzaria na conversa do WhatsApp para você concluir o pagamento.</p>
+    </div>
+
+    <div class="grupo-formulario">
+      <h3 class="grupo-formulario__titulo">4. Observações do pedido</h3>
+      <label class="campo" for="observacoesGerais">
+        Alguma informação extra? <span class="campo__opcional">(opcional)</span>
+        <textarea id="observacoesGerais" name="observacoesGerais" rows="2" maxlength="200" placeholder="Ex: tocar interfone, deixar com o porteiro..."></textarea>
+      </label>
+    </div>
+
+    <div class="grupo-formulario">
+      <h3 class="grupo-formulario__titulo">5. Resumo do pedido</h3>
+      <div class="resumo-pedido" id="resumoPedido"><!-- gerado via JavaScript --></div>
+      <div class="linha-resumo">
+        <span>Subtotal</span>
+        <strong id="resumoSubtotal">R$ 0,00</strong>
+      </div>
+      <div class="linha-resumo" id="linhaTaxaEntrega">
+        <span>Taxa de entrega</span>
+        <strong id="resumoTaxaEntrega">R$ 0,00</strong>
+      </div>
+      <div class="linha-resumo linha-resumo--total">
+        <span>Total</span>
+        <strong id="resumoTotal">R$ 0,00</strong>
+      </div>
+    </div>
+
+    <button type="submit" class="botao botao--whatsapp botao--bloco" id="botaoFinalizarPedido">
+      <span aria-hidden="true">✅</span> Enviar pedido pelo WhatsApp
+    </button>
+    <p class="formulario-checkout__aviso">Ao confirmar, abriremos o WhatsApp da pizzaria com seu pedido pronto — é só apertar enviar.</p>
+  </form>
+</aside>
+
+<!-- ===================== TOAST DE FEEDBACK ===================== -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
