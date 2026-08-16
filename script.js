@@ -282,34 +282,18 @@ function buscarProdutoPorId(produtoId) {
   return PRODUTOS.find((produto) => produto.id === produtoId);
 }
 
-/* Mostra uma notificação rápida (toast). Usa a Popover API nativa
-   (showPopover()/hidePopover()) para garantir que a mensagem sempre
-   apareça acima de qualquer <dialog> aberto — ambos são renderizados
-   na mesma camada especial do navegador (o "top layer"), e o elemento
-   mostrado mais recentemente fica por cima. Em navegadores muito
-   antigos, sem suporte à Popover API, cai num modo de reserva baseado
-   em classe CSS. */
+/* Mostra uma notificação rápida (toast) por 3.2s, usando uma simples
+   troca de classe. Como os painéis e modais voltaram a ser divs
+   controladas por nós (em vez de <dialog> nativo competindo pela
+   camada superior do navegador), um z-index alto é suficiente para
+   garantir que o toast sempre apareça por cima de tudo. */
 function mostrarToast(mensagem, tipo = '') {
   const toast = document.getElementById('toast');
-  const suportaPopover = typeof toast.showPopover === 'function';
-
-  clearTimeout(mostrarToast._timeout);
   toast.textContent = mensagem;
-  toast.className = 'toast' + (tipo ? ' toast--' + tipo : '');
-
-  if (suportaPopover) {
-    if (toast.matches(':popover-open')) toast.hidePopover();
-    toast.showPopover();
-  } else {
-    toast.classList.add('toast--visivel');
-  }
-
+  toast.className = 'toast toast--visivel' + (tipo ? ' toast--' + tipo : '');
+  clearTimeout(mostrarToast._timeout);
   mostrarToast._timeout = setTimeout(() => {
-    if (suportaPopover) {
-      toast.hidePopover();
-    } else {
-      toast.classList.remove('toast--visivel');
-    }
+    toast.classList.remove('toast--visivel');
   }, 3200);
 }
 
@@ -455,50 +439,46 @@ function configurarBusca() {
 }
 
 /* =========================================================================
-   8. <DIALOG> — ABERTURA/FECHAMENTO SEGUROS
+   8. ABRIR/FECHAR MODAIS E PAINÉIS (mecanismo por classe)
    ========================================================================= */
 
-/* Abre um <dialog> com showModal(), protegendo contra o erro que o
-   navegador lançaria se ele já estivesse aberto (ex: duplo clique muito
-   rápido no botão que o aciona). */
-function abrirDialogo(dialogo) {
-  if (!dialogo.open) dialogo.showModal();
+/* Mapeia cada modal/painel para sua sobreposição (overlay) associada.
+   Cada um tem sua própria div de fundo escurecido — mais simples e
+   previsível do que compartilhar uma única sobreposição entre os três. */
+const MAPA_SOBREPOSICOES = {
+  modalProduto: 'sobreposicaoProduto',
+  painelCarrinho: 'sobreposicaoCarrinho',
+  painelCheckout: 'sobreposicaoCheckout',
+};
+
+function abrirPainel(idPainel) {
+  document.getElementById(MAPA_SOBREPOSICOES[idPainel]).classList.remove('oculto');
+  document.getElementById(idPainel).classList.remove('oculto');
+  travarRolagemFundo(true);
 }
 
-/* Fecha um <dialog>. close() já é seguro de chamar mesmo se o diálogo
-   não estiver aberto (não faz nada e não lança erro), mas o "if"
-   deixa a intenção explícita e evita disparar o evento "close" à toa. */
-function fecharDialogo(dialogo) {
-  if (dialogo.open) dialogo.close();
+function fecharPainel(idPainel) {
+  document.getElementById(MAPA_SOBREPOSICOES[idPainel]).classList.add('oculto');
+  document.getElementById(idPainel).classList.add('oculto');
+  travarRolagemFundo(false);
 }
 
-/* Fecha o diálogo quando o clique acontece fora da área visível dele
-   (ou seja, no ::backdrop). Comparamos as coordenadas do clique com o
-   retângulo real do elemento em vez de checar "event.target === dialogo",
-   que é uma forma menos confiável de detectar clique no backdrop entre
-   navegadores diferentes. */
-function fecharAoClicarFora(dialogo) {
-  dialogo.addEventListener('click', (evento) => {
-    const retangulo = dialogo.getBoundingClientRect();
-    const cliqueDentro = (
-      evento.clientX >= retangulo.left &&
-      evento.clientX <= retangulo.right &&
-      evento.clientY >= retangulo.top &&
-      evento.clientY <= retangulo.bottom
-    );
-    if (!cliqueDentro) dialogo.close();
+function configurarComportamentoDosPaineis() {
+  Object.entries(MAPA_SOBREPOSICOES).forEach(([idPainel, idSobreposicao]) => {
+    // Clicar na sobreposição (fora do painel) fecha o painel
+    document.getElementById(idSobreposicao).addEventListener('click', () => {
+      fecharPainel(idPainel);
+    });
   });
-}
 
-/* Configura o comportamento comum aos três <dialog> da página: destrava
-   a rolagem do fundo assim que qualquer um deles fecha (por botão, Esc
-   ou clique fora — o evento "close" nativo cobre todos os casos) e
-   permite fechar clicando fora. */
-function configurarComportamentoDosDialogos() {
-  ['modalProduto', 'painelCarrinho', 'painelCheckout'].forEach((id) => {
-    const dialogo = document.getElementById(id);
-    dialogo.addEventListener('close', () => travarRolagemFundo(false));
-    fecharAoClicarFora(dialogo);
+  // Esc fecha o painel/modal que estiver aberto no momento
+  document.addEventListener('keydown', (evento) => {
+    if (evento.key !== 'Escape') return;
+    Object.keys(MAPA_SOBREPOSICOES).forEach((idPainel) => {
+      if (!document.getElementById(idPainel).classList.contains('oculto')) {
+        fecharPainel(idPainel);
+      }
+    });
   });
 }
 
@@ -543,12 +523,11 @@ function abrirModalProduto(produtoId) {
   });
 
   atualizarPrecoTotalModal();
-  abrirDialogo(document.getElementById('modalProduto'));
-  travarRolagemFundo(true);
+  abrirPainel('modalProduto');
 }
 
 function fecharModalProdutoFn() {
-  fecharDialogo(document.getElementById('modalProduto'));
+  fecharPainel('modalProduto');
 }
 
 function atualizarPrecoTotalModal() {
@@ -706,25 +685,23 @@ function abrirCarrinho() {
     mostrarToast('Seu carrinho está vazio. Adicione uma pizza! 🍕');
     return;
   }
-  abrirDialogo(document.getElementById('painelCarrinho'));
-  travarRolagemFundo(true);
+  abrirPainel('painelCarrinho');
 }
 
 function fecharCarrinhoFn() {
-  fecharDialogo(document.getElementById('painelCarrinho'));
+  fecharPainel('painelCarrinho');
 }
 
 function abrirCheckout() {
   fecharCarrinhoFn();
   ocultarLinkManualWhatsApp();
   atualizarResumoCheckout();
-  abrirDialogo(document.getElementById('painelCheckout'));
-  travarRolagemFundo(true);
+  abrirPainel('painelCheckout');
 }
 
 function fecharCheckoutFn() {
   ocultarLinkManualWhatsApp();
-  fecharDialogo(document.getElementById('painelCheckout'));
+  fecharPainel('painelCheckout');
 }
 
 /* =========================================================================
@@ -941,17 +918,17 @@ function configurarEnvioFormularioCheckout() {
 
     const formulario = evento.target;
     const dados = {
-      nomeCliente: formulario.nomeCliente.value.trim(),
-      telefoneCliente: formulario.telefoneCliente.value.trim(),
+      nomeCliente: document.getElementById('nomeCliente').value.trim(),
+      telefoneCliente: document.getElementById('telefoneCliente').value.trim(),
       tipoEntrega: obterTipoEntregaSelecionado(),
-      ruaEndereco: formulario.ruaEndereco.value.trim(),
-      numeroEndereco: formulario.numeroEndereco.value.trim(),
-      bairroEndereco: formulario.bairroEndereco.value.trim(),
-      complementoEndereco: formulario.complementoEndereco.value.trim(),
-      referenciaEndereco: formulario.referenciaEndereco.value.trim(),
+      ruaEndereco: document.getElementById('ruaEndereco').value.trim(),
+      numeroEndereco: document.getElementById('numeroEndereco').value.trim(),
+      bairroEndereco: document.getElementById('bairroEndereco').value.trim(),
+      complementoEndereco: document.getElementById('complementoEndereco').value.trim(),
+      referenciaEndereco: document.getElementById('referenciaEndereco').value.trim(),
       formaPagamento: obterFormaPagamentoSelecionada(),
-      trocoPara: formulario.trocoPara.value.trim(),
-      observacoesGerais: formulario.observacoesGerais.value.trim(),
+      trocoPara: document.getElementById('trocoPara').value.trim(),
+      observacoesGerais: document.getElementById('observacoesGerais').value.trim(),
     };
 
     if (!validarFormularioCheckout(dados)) return;
@@ -1008,9 +985,6 @@ function configurarEventosGerais() {
     fecharCheckoutFn();
     abrirCarrinho();
   });
-
-  // Não é preciso mais escutar a tecla Esc manualmente: o <dialog>
-  // nativo já fecha sozinho com Esc (dispara "cancel" e depois "close").
 }
 
 /* =========================================================================
@@ -1020,9 +994,21 @@ function inicializarAplicacao() {
   carregarCarrinhoLocalStorage();
   renderizarNavegacaoCategorias();
   renderizarCardapio();
-  observarCategoriasVisiveis();
+
+  // observarCategoriasVisiveis() é só um realce visual (destaca a
+  // categoria atual na navegação enquanto o cliente rola a página).
+  // Isolamos com try/catch de propósito: se IntersectionObserver não
+  // existir ou falhar por qualquer motivo em algum navegador, isso NÃO
+  // pode impedir a busca, o carrinho e o checkout de funcionarem —
+  // que são as funções essenciais configuradas logo abaixo.
+  try {
+    observarCategoriasVisiveis();
+  } catch (erro) {
+    console.warn('Realce de categoria ativa desativado (navegador sem suporte?):', erro);
+  }
+
   configurarBusca();
-  configurarComportamentoDosDialogos();
+  configurarComportamentoDosPaineis();
   configurarControlesQuantidadeModal();
   configurarFormularioProduto();
   configurarAlternanciaEntrega();

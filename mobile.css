@@ -94,11 +94,11 @@
 }
 
 /* -------------------- MODAL DE PRODUTO (mobile = folha inferior) --------------------
-   O <dialog> ganha o atributo "open" quando showModal() é chamado — por
-   isso a animação de entrada usa o seletor [open] em vez da antiga
-   classe ":not(.oculto)". Usamos @keyframes (não transition) porque uma
-   transição não anima de forma confiável quando o elemento parte de
-   display:none, que é o estado padrão de um <dialog> fechado. */
+   Usamos @keyframes (não transition) porque uma transição não anima de
+   forma confiável quando o elemento parte de display:none — o
+   navegador não tem um "estado anterior" renderizado para animar a
+   partir dele. A classe ".oculto" (display:none) é quem controla se o
+   modal existe ou não visualmente; ":not(.oculto)" dispara a entrada. */
 .modal-produto {
   left: 0;
   right: 0;
@@ -109,7 +109,7 @@
   width: 100%;
   border-radius: 1.6rem 1.6rem 0 0;
 }
-.modal-produto[open] {
+.modal-produto:not(.oculto) {
   animation: subir-modal var(--transicao-media);
 }
 @keyframes subir-modal {
@@ -157,7 +157,7 @@
   width: 100%;
   transform: translateX(100%);
 }
-.painel-lateral[open] {
+.painel-lateral:not(.oculto) {
   animation: deslizar-painel-lateral var(--transicao-media) forwards;
 }
 @keyframes deslizar-painel-lateral {
@@ -278,7 +278,7 @@
     max-height: 85dvh;
     border-radius: var(--raio-lg);
   }
-  .modal-produto[open] {
+  .modal-produto:not(.oculto) {
     animation: aparecer-modal-central var(--transicao-media);
   }
   @keyframes aparecer-modal-central {

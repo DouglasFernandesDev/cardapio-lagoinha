@@ -64,11 +64,15 @@
   --transicao-rapida: 150ms ease;
   --transicao-media: 260ms cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* Camadas (z-index). Os <dialog> e o toast (popover) não precisam de
-     z-index próprio: o navegador já os renderiza numa camada acima de
-     tudo (o "top layer"), então só sobra o que fica no fluxo normal. */
+  /* Camadas (z-index). Como voltamos a controlar os painéis e modais
+     manualmente (em vez do <dialog> nativo), somos nós que garantimos
+     a ordem de empilhamento — por isso a lista completa aqui. */
   --camada-navegacao: 40;
   --camada-flutuante: 50;
+  --camada-sobreposicao: 60;
+  --camada-painel: 70;
+  --camada-modal: 80;
+  --camada-toast: 100;
 }
 
 /* -------------------- 2. RESET -------------------- */
@@ -507,33 +511,36 @@ h3 {
   }
 }
 
-/* -------------------- 9. <DIALOG> — MODAL, CARRINHO E CHECKOUT --------------------
-   Usamos o elemento <dialog> nativo (showModal()/close() no script.js) em
-   vez de divs de overlay controladas manualmente. Vantagens diretas:
-   - foco automático e "trap" de foco dentro do diálogo;
-   - Esc fecha sozinho, sem precisarmos escutar keydown manualmente;
-   - a camada escura de fundo vem de graça via ::backdrop, sem precisar
-     de uma div extra para isso;
-   - o navegador desenha tudo numa camada acima do resto da página
-     (o "top layer"), então não há briga de z-index possível aqui. */
-.modal-produto::backdrop,
-.painel-lateral::backdrop {
+/* -------------------- 9. SOBREPOSIÇÃO (overlay escuro) --------------------
+   Voltamos a usar uma div própria para o fundo escurecido, controlada
+   por nós via classe .oculto. É um pouco mais verboso que o ::backdrop
+   do <dialog> nativo, mas é 100% previsível: nenhuma folha de estilo
+   interna do navegador para entrar em conflito com o nosso CSS. */
+.sobreposicao {
+  position: fixed;
+  inset: 0;
   background: rgba(43, 10, 8, 0.6);
   backdrop-filter: blur(2px);
+  z-index: var(--camada-sobreposicao);
+  animation: aparecer-sobreposicao var(--transicao-media);
+}
+@keyframes aparecer-sobreposicao {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* -------------------- 10. MODAL DE PRODUTO -------------------- */
 .modal-produto {
   position: fixed;
+  z-index: var(--camada-modal);
   background: var(--cor-creme);
   color: inherit;
-  border: none;
   box-shadow: var(--sombra-forte);
   overflow-y: auto;
-  padding: 0;
-  margin: 0;
-  max-width: none;
-  max-height: none;
 }
 .modal-produto__fechar {
   position: absolute;
@@ -661,19 +668,26 @@ h3 {
   text-align: center;
 }
 
-/* -------------------- 11. PAINÉIS (carrinho/checkout) -------------------- */
+/* -------------------- 11. PAINÉIS (carrinho/checkout) --------------------
+   IMPORTANTE: "display: flex" só é aplicado dentro de ":not(.oculto)".
+   Deixar "display: flex" incondicional aqui foi exatamente o bug do
+   painel aparecendo fora do lugar: com display fixo, a única coisa que
+   escondia o painel era o "transform" empurrando-o para fora da tela —
+   qualquer imprecisão nesse cálculo (ou diferença de comportamento
+   entre navegadores) deixava o painel visível/mal posicionado. Agora,
+   quando ".oculto" está presente, "display: none !important" (definido
+   mais abaixo, na seção 3) garante que o painel simplesmente não existe
+   visualmente — sem depender de transform nenhum. */
 .painel-lateral {
   position: fixed;
+  z-index: var(--camada-painel);
   background: var(--cor-creme);
   color: inherit;
+  box-shadow: var(--sombra-forte);
+}
+.painel-lateral:not(.oculto) {
   display: flex;
   flex-direction: column;
-  box-shadow: var(--sombra-forte);
-  border: none;
-  padding: 0;
-  margin: 0;
-  max-width: none;
-  max-height: none;
 }
 .painel-lateral__cabecalho {
   display: flex;
@@ -975,19 +989,12 @@ h3 {
   text-align: center;
 }
 
-/* -------------------- 13. TOAST (Popover API) --------------------
-   O toast usa popover="manual" no HTML e showPopover()/hidePopover()
-   no script.js. Isso garante que a mensagem apareça acima de qualquer
-   <dialog> aberto (ambos usam o "top layer" do navegador, e o mais
-   recente a ser exibido fica por cima). Navegadores muito antigos, sem
-   suporte à Popover API, caem no modo de reserva via classe
-   ".toast--visivel" (ver script.js). */
+/* -------------------- 13. TOAST -------------------- */
 .toast {
   position: fixed;
   left: 50%;
   bottom: 1.2rem;
-  margin: 0;
-  border: none;
+  z-index: var(--camada-toast);
   background: var(--cor-escura);
   color: var(--cor-creme);
   padding: 0.8rem 1.4rem;
@@ -998,18 +1005,10 @@ h3 {
   max-width: 90vw;
   text-align: center;
   transform: translate(-50%, 120%);
+  transition: transform var(--transicao-media);
 }
-.toast:popover-open,
-.toast.toast--visivel {
-  animation: subir-toast var(--transicao-media) forwards;
-}
-@keyframes subir-toast {
-  from {
-    transform: translate(-50%, 120%);
-  }
-  to {
-    transform: translate(-50%, 0);
-  }
+.toast--visivel {
+  transform: translate(-50%, 0);
 }
 .toast--erro {
   background: var(--cor-perigo);

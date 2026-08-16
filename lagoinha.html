@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -80,11 +79,17 @@
 </button>
 
 <!-- =====================================================================
-     MODAL DE PRODUTO — <dialog> nativo: dá foco automático, bloqueia
-     interação com o fundo, fecha com Esc e já vem com backdrop próprio
-     (::backdrop), sem precisar de uma div de sobreposição separada.
+     MODAL DE PRODUTO — div controlada por classe (.oculto). Optamos por
+     NÃO usar <dialog> nativo aqui: o <dialog> vem com uma folha de
+     estilos própria do navegador (definindo display, position, margin
+     etc.) que compete com o nosso CSS de formas que variam entre
+     Chrome/Safari/Firefox. Como não há como testar pixel a pixel em
+     todos os navegadores neste ambiente, preferimos o mecanismo abaixo:
+     100% controlado pelo nosso próprio CSS, sem nenhuma regra "de
+     fábrica" do navegador para entrar em conflito.
      ===================================================================== -->
-<dialog id="modalProduto" class="modal-produto" aria-labelledby="modalProdutoTitulo">
+<div class="sobreposicao oculto" id="sobreposicaoProduto"></div>
+<section id="modalProduto" class="modal-produto oculto" role="dialog" aria-modal="true" aria-labelledby="modalProdutoTitulo">
   <button type="button" id="fecharModalProduto" class="modal-produto__fechar" aria-label="Fechar">✕</button>
 
   <header class="modal-produto__cabecalho">
@@ -115,12 +120,14 @@
       </button>
     </footer>
   </form>
-</dialog>
+</section>
 
 <!-- =====================================================================
-     PAINEL: CARRINHO — também um <dialog> nativo (drawer modal).
+     PAINEL: CARRINHO — div controlada por classe (.oculto), mesmo
+     motivo explicado acima no modal de produto.
      ===================================================================== -->
-<dialog id="painelCarrinho" class="painel-lateral" aria-label="Carrinho de compras">
+<div class="sobreposicao oculto" id="sobreposicaoCarrinho"></div>
+<aside id="painelCarrinho" class="painel-lateral oculto" aria-label="Carrinho de compras">
   <header class="painel-lateral__cabecalho">
     <h2>Seu carrinho</h2>
     <button type="button" id="fecharCarrinho" class="painel-lateral__fechar" aria-label="Fechar carrinho">✕</button>
@@ -143,14 +150,16 @@
       Continuar para o checkout
     </button>
   </footer>
-</dialog>
+</aside>
 
 <!-- =====================================================================
-     PAINEL: CHECKOUT — <dialog> nativo. Cada etapa do formulário é um
-     <fieldset>/<legend> em vez de div+aria — semântica nativa do HTML
-     para agrupar campos relacionados, sem depender de ARIA manual.
+     PAINEL: CHECKOUT — div controlada por classe (.oculto), mesmo
+     motivo explicado acima no modal de produto. Cada etapa do
+     formulário continua sendo um <fieldset>/<legend> — essa parte da
+     semântica não depende do mecanismo de abrir/fechar e é 100% segura.
      ===================================================================== -->
-<dialog id="painelCheckout" class="painel-lateral painel-lateral--checkout" aria-label="Finalizar pedido">
+<div class="sobreposicao oculto" id="sobreposicaoCheckout"></div>
+<aside id="painelCheckout" class="painel-lateral painel-lateral--checkout oculto" aria-label="Finalizar pedido">
   <header class="painel-lateral__cabecalho">
     <button type="button" id="voltarParaCarrinho" class="painel-lateral__voltar" aria-label="Voltar ao carrinho">←</button>
     <h2>Finalizar pedido</h2>
@@ -279,15 +288,15 @@
       <span aria-hidden="true">📲</span> Não abriu? Toque aqui para enviar pelo WhatsApp
     </a>
   </form>
-</dialog>
+</aside>
 
 <!-- =====================================================================
-     TOAST — usa a Popover API nativa (popover="manual") para garantir
-     que a mensagem sempre apareça acima de qualquer <dialog> aberto.
-     Navegadores sem suporte à Popover API recebem um modo de reserva
-     controlado por classe (ver script.js e style.css).
+     TOAST — div simples controlada por classe, com z-index alto o
+     bastante para ficar acima da sobreposição e dos painéis (que agora
+     também são controlados manualmente por nós, então não há mais
+     nenhuma camada "surpresa" do navegador para disputar espaço aqui).
      ===================================================================== -->
-<div id="toast" class="toast" popover="manual" role="status" aria-live="polite"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="script.js"></script>
 </body>
