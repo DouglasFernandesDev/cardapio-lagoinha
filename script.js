@@ -337,10 +337,31 @@ function renderizarNavegacaoCategorias() {
 
   nav.querySelectorAll('.navegacao-categorias__botao').forEach((botao) => {
     botao.addEventListener('click', () => {
-      const alvo = document.getElementById(botao.dataset.categoriaAlvo);
-      if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      rolarParaSecao(botao.dataset.categoriaAlvo);
     });
   });
+}
+
+/* Rola a página até a seção da categoria clicada. Em vez de usar
+   scrollIntoView() com um "scroll-margin-top" fixo estimado em CSS,
+   medimos a altura REAL da barra de categorias (que fica fixa no topo)
+   no momento do clique e calculamos a posição exata — isso evita que o
+   título da seção fique escondido atrás da barra fixa, que foi o bug
+   relatado ("não rola pra aba correta"). Um valor fixo em CSS pode
+   ficar impreciso se a altura da barra mudar (fonte carregando,
+   quebra de linha em telas estreitas, área segura do celular etc.);
+   medir com JS elimina esse tipo de imprecisão. */
+function rolarParaSecao(idSecao) {
+  const secao = document.getElementById(idSecao);
+  const nav = document.getElementById('navCategorias');
+  if (!secao || !nav) return;
+
+  const alturaNav = nav.getBoundingClientRect().height;
+  const respiro = 16; // px de espaço extra entre a barra fixa e o título
+  const posicaoAtual = window.pageYOffset || document.documentElement.scrollTop;
+  const posicaoAlvo = secao.getBoundingClientRect().top + posicaoAtual - alturaNav - respiro;
+
+  window.scrollTo({ top: Math.max(posicaoAlvo, 0), behavior: 'smooth' });
 }
 
 function renderizarCartaoProduto(produto) {
@@ -585,7 +606,8 @@ function atualizarIndicadoresCarrinho() {
 
   document.getElementById('contadorCarrinho').textContent = quantidadeTotal;
   document.getElementById('totalCarrinhoFlutuante').textContent = formatarMoeda(subtotal);
-  document.getElementById('botaoCarrinhoFlutuante').classList.toggle('oculto', quantidadeTotal === 0);
+  // O botão fica sempre visível (mesmo com o carrinho vazio) para que o
+  // cliente sempre tenha acesso rápido a ele.
 }
 
 function renderizarItemCarrinho(item) {
@@ -681,10 +703,9 @@ function carregarCarrinhoLocalStorage() {
    11. ABRIR/FECHAR PAINÉIS (carrinho e checkout)
    ========================================================================= */
 function abrirCarrinho() {
-  if (estado.carrinho.length === 0) {
-    mostrarToast('Seu carrinho está vazio. Adicione uma pizza! 🍕');
-    return;
-  }
+  // O painel sempre abre, mesmo com o carrinho vazio — nesse caso ele
+  // mostra a mensagem "Seu carrinho está vazio" (ver #carrinhoVazio em
+  // renderizarCarrinho()) em vez de recusar abrir.
   abrirPainel('painelCarrinho');
 }
 

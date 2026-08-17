@@ -11,9 +11,9 @@
 /* -------------------- 1. VARIÁVEIS DE DESIGN -------------------- */
 :root {
   /* Vermelho — cor principal da marca (molho de tomate / fogo do forno) */
-  --cor-vermelho: #D62839;
-  --cor-vermelho-escuro: #971C28;
-  --cor-vermelho-claro: #F2555F;
+  --cor-vermelho: #DE1208;
+  --cor-vermelho-escuro: #A30D05;
+  --cor-vermelho-claro: #FF4438;
 
   /* Amarelo — cor de destaque (queijo derretido / crosta dourada) */
   --cor-amarelo: #FFC627;
