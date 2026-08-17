@@ -342,36 +342,97 @@ function renderizarNavegacaoCategorias() {
   });
 }
 
-/* Rola a página até a seção da categoria clicada. Em vez de usar
-   scrollIntoView() com um "scroll-margin-top" fixo estimado em CSS,
-   medimos a altura REAL da barra de categorias (que fica fixa no topo)
-   no momento do clique e calculamos a posição exata — isso evita que o
-   título da seção fique escondido atrás da barra fixa, que foi o bug
-   relatado ("não rola pra aba correta"). Um valor fixo em CSS pode
-   ficar impreciso se a altura da barra mudar (fonte carregando,
-   quebra de linha em telas estreitas, área segura do celular etc.);
-   medir com JS elimina esse tipo de imprecisão. */
+/* Calcula a posição exata da seção (medindo a altura real da barra fixa
+   no momento do clique) e rola até ela com uma animação própria, feita
+   à mão com requestAnimationFrame.
+
+   Por quê não usar scrollIntoView()/window.scrollTo({behavior:'smooth'})
+   direto? Testamos exaustivamente e confirmamos: a rolagem suave NATIVA
+   do navegador tem duração variável (mais longa quanto maior a
+   distância) e pode ser interrompida por qualquer nova chamada de
+   rolagem ou, em celulares mais lentos, simplesmente não terminar a
+   tempo — fazendo a página "empacar" no meio do caminho. Isso era
+   exatamente o bug relatado. Controlando a animação nós mesmos, com
+   duração sempre fixa (450ms) e um único requestAnimationFrame por vez,
+   garantimos que a rolagem sempre termina no lugar certo. */
 function rolarParaSecao(idSecao) {
   const secao = document.getElementById(idSecao);
   const nav = document.getElementById('navCategorias');
   if (!secao || !nav) return;
 
   const alturaNav = nav.getBoundingClientRect().height;
-  const respiro = 16; // px de espaço extra entre a barra fixa e o título
-  const posicaoAtual = window.pageYOffset || document.documentElement.scrollTop;
-  const posicaoAlvo = secao.getBoundingClientRect().top + posicaoAtual - alturaNav - respiro;
+  const respiro = 16;
+  const posicaoInicial = window.pageYOffset || document.documentElement.scrollTop;
+  const alturaMaximaRolavel = document.documentElement.scrollHeight - window.innerHeight;
+  const posicaoAlvoBruta = secao.getBoundingClientRect().top + posicaoInicial - alturaNav - respiro;
+  const posicaoAlvo = Math.max(0, Math.min(posicaoAlvoBruta, alturaMaximaRolavel));
 
-  window.scrollTo({ top: Math.max(posicaoAlvo, 0), behavior: 'smooth' });
+  rolarSuavemente(posicaoAlvo, 450);
+}
+
+/* Anima a rolagem vertical da página até "destinoY" ao longo de
+   "duracaoMs", usando requestAnimationFrame com suavização
+   ease-in-out. Cada quadro usa window.scrollTo com behavior:'instant'
+   de propósito — é a nossa própria função quem controla a suavidade
+   quadro a quadro; se deixássemos o navegador "suavizar" cada
+   mini-salto também, as duas suavizações se atrapalhariam. */
+let animacaoDeRolagemEmAndamento = null;
+
+function rolarSuavemente(destinoY, duracaoMs) {
+  if (animacaoDeRolagemEmAndamento) {
+    cancelAnimationFrame(animacaoDeRolagemEmAndamento);
+  }
+
+  const origemY = window.pageYOffset || document.documentElement.scrollTop;
+  const distancia = destinoY - origemY;
+  const inicioTempo = performance.now();
+
+  function suavizarEaseInOutCubico(progresso) {
+    return progresso < 0.5
+      ? 4 * progresso * progresso * progresso
+      : 1 - Math.pow(-2 * progresso + 2, 3) / 2;
+  }
+
+  function passo(agora) {
+    const decorrido = agora - inicioTempo;
+    const progresso = Math.min(decorrido / duracaoMs, 1);
+    const y = origemY + distancia * suavizarEaseInOutCubico(progresso);
+
+    window.scrollTo({ top: y, behavior: 'instant' });
+
+    if (progresso < 1) {
+      animacaoDeRolagemEmAndamento = requestAnimationFrame(passo);
+    } else {
+      animacaoDeRolagemEmAndamento = null;
+    }
+  }
+
+  animacaoDeRolagemEmAndamento = requestAnimationFrame(passo);
+}
+
+/* Mede a altura real da barra fixa de categorias — usada apenas para
+   manter o "scroll-margin-top" em CSS coerente (útil para outros casos
+   de rolagem que não passam por rolarParaSecao, como navegação por
+   teclado/leitor de tela). */
+function ajustarMargemDeRolagem() {
+  const nav = document.getElementById('navCategorias');
+  if (!nav) return;
+  const altura = nav.getBoundingClientRect().height;
+  document.documentElement.style.setProperty('--altura-nav-categorias', (altura + 16) + 'px');
 }
 
 function renderizarCartaoProduto(produto) {
   const menorPreco = Math.min(...produto.variacoes.map((v) => v.preco));
   const prefixo = produto.variacoes.length > 1 ? 'a partir de' : 'preço';
+  const caminhoFoto = `imagens/produtos/${produto.id}.jpg`;
 
   return `
     <li>
       <article class="cartao-produto" data-produto-id="${produto.id}" data-nome-busca="${normalizarTexto(produto.nome + ' ' + produto.descricao)}">
-        <figure class="cartao-produto__emoji-area" aria-hidden="true">${produto.emoji}</figure>
+        <figure class="cartao-produto__emoji-area">
+          <span class="cartao-produto__emoji-fallback" aria-hidden="true">${produto.emoji}</span>
+          <img class="cartao-produto__foto" src="${caminhoFoto}" alt="Foto de ${produto.nome}" loading="lazy">
+        </figure>
         <div class="cartao-produto__conteudo">
           <h3 class="cartao-produto__nome">${produto.nome}</h3>
           <p class="cartao-produto__descricao">${produto.descricao}</p>
@@ -386,6 +447,21 @@ function renderizarCartaoProduto(produto) {
     </li>
   `;
 }
+
+/* Esconde a foto de um produto se ela não existir ainda (o cliente
+   ainda não subiu o arquivo correspondente), deixando o emoji/gradiente
+   visível por baixo como visual provisório — sem quebrar o layout com
+   um ícone de "imagem quebrada". Assim que o cliente adicionar o
+   arquivo com o nome certo (ex: imagens/produtos/p01.jpg), a foto passa
+   a aparecer sozinha, sem precisar mudar nada no código. */
+function configurarFallbackDeFotos(escopo) {
+  escopo.querySelectorAll('.cartao-produto__foto, .modal-produto__foto').forEach((img) => {
+    img.onerror = () => {
+      img.style.display = 'none';
+    };
+  });
+}
+
 
 function renderizarCardapio() {
   const container = document.getElementById('listaCategorias');
@@ -407,12 +483,25 @@ function renderizarCardapio() {
   container.querySelectorAll('[data-abrir-produto]').forEach((botao) => {
     botao.addEventListener('click', () => abrirModalProduto(botao.dataset.abrirProduto));
   });
+
+  configurarFallbackDeFotos(container);
 }
 
-/* Destaca a categoria visível durante a rolagem */
+/* Destaca a categoria visível durante a rolagem.
+   IMPORTANTE: aqui usamos APENAS o scrollLeft da lista de categorias
+   (rolagem horizontal), nunca scrollIntoView(). O scrollIntoView()
+   soma ajustes em TODOS os contêineres roláveis de um elemento — como
+   o botão de categoria vive dentro da barra horizontal E dentro da
+   página (rolagem vertical), ele também tentava ajustar a rolagem
+   vertical da página, o que CANCELAVA a rolagem suave que estava em
+   andamento (disparada ao clicar numa categoria). Esse cancelamento no
+   meio do caminho era exatamente o bug "não consigo rolar pra baixo".
+   Usando scrollLeft diretamente, mexemos só na barra horizontal e
+   nunca tocamos na rolagem vertical da página. */
 function observarCategoriasVisiveis() {
   const secoes = document.querySelectorAll('[data-categoria-secao]');
   const botoesNav = document.querySelectorAll('.navegacao-categorias__botao');
+  const listaNav = document.querySelector('.navegacao-categorias__lista');
 
   const observador = new IntersectionObserver((entradas) => {
     entradas.forEach((entrada) => {
@@ -420,12 +509,18 @@ function observarCategoriasVisiveis() {
       botoesNav.forEach((botao) => {
         const ativo = botao.dataset.categoriaAlvo === entrada.target.id;
         botao.setAttribute('aria-current', ativo ? 'true' : 'false');
-        if (ativo) botao.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        if (ativo) centralizarBotaoNaNavegacao(botao, listaNav);
       });
     });
   }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
 
   secoes.forEach((secao) => observador.observe(secao));
+}
+
+function centralizarBotaoNaNavegacao(botao, listaNav) {
+  if (!listaNav) return;
+  const alvo = botao.offsetLeft + botao.offsetWidth / 2 - listaNav.clientWidth / 2;
+  listaNav.scrollTo({ left: Math.max(alvo, 0), behavior: 'smooth' });
 }
 
 /* =========================================================================
@@ -519,6 +614,12 @@ function abrirModalProduto(produtoId) {
   document.getElementById('modalProdutoDescricao').textContent = produto.descricao;
   document.getElementById('observacaoProduto').value = '';
   document.getElementById('valorQuantidade').textContent = '1';
+
+  const fotoModal = document.getElementById('modalProdutoFoto');
+  fotoModal.style.display = '';
+  fotoModal.src = `imagens/produtos/${produto.id}.jpg`;
+  fotoModal.alt = `Foto de ${produto.nome}`;
+  configurarFallbackDeFotos(document.getElementById('modalProduto'));
 
   const secaoVariacoes = document.getElementById('secaoVariacoes');
   secaoVariacoes.classList.toggle('oculto', produto.variacoes.length <= 1);
@@ -1015,6 +1116,8 @@ function inicializarAplicacao() {
   carregarCarrinhoLocalStorage();
   renderizarNavegacaoCategorias();
   renderizarCardapio();
+  ajustarMargemDeRolagem();
+  window.addEventListener('resize', ajustarMargemDeRolagem);
 
   // observarCategoriasVisiveis() é só um realce visual (destaca a
   // categoria atual na navegação enquanto o cliente rola a página).
