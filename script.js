@@ -1,5 +1,5 @@
 /* =========================================================================
-   PIZZARIA NONNA BELLA — SCRIPT.JS
+   PIZZARIA LAGOINHA — SCRIPT.JS
    Lógica do cardápio, carrinho, checkout e envio do pedido via WhatsApp.
    ========================================================================= */
 
@@ -127,7 +127,7 @@ const PRODUTOS = [
     ],
   },
   {
-    id: 'p10', categoriaId: 'especiais', emoji: '🍆',
+    id: 'p11', categoriaId: 'especiais', emoji: '🍆',
     nome: 'Bacon',
     descricao: 'Mussarela, bacon e orégano.',
     variacoes: [
@@ -136,7 +136,7 @@ const PRODUTOS = [
     ],
   },
   {
-    id: 'p10', categoriaId: 'especiais', emoji: '🍆',
+    id: 'p12', categoriaId: 'especiais', emoji: '🍆',
     nome: 'Bacon com ovos',
     descricao: 'Mussarela, bacon, ovo e orégano.',
     variacoes: [
@@ -147,7 +147,7 @@ const PRODUTOS = [
 
   // ---------------- PREMIUM ----------------
   {
-    id: 'p11', categoriaId: 'premium', emoji: '🍆',
+    id: 'p13', categoriaId: 'premium', emoji: '🍆',
     nome: 'Camarão com requeijão',
     descricao: 'Mussarela, camarão, requeijão cremoso e orégano.',
     variacoes: [
@@ -156,7 +156,7 @@ const PRODUTOS = [
     ],
   },
   {
-    id: 'p12', categoriaId: 'premium', emoji: '🍆',
+    id: 'p14', categoriaId: 'premium', emoji: '🍆',
     nome: 'Três porquinhos',
     descricao: 'Mussarela, presunto, calabresa, bacon e orégano.',
     variacoes: [
@@ -165,7 +165,7 @@ const PRODUTOS = [
     ],
   },
   {
-    id: 'p13', categoriaId: 'premium', emoji: '🍆',
+    id: 'p15', categoriaId: 'premium', emoji: '🍆',
     nome: 'Quatro queijos',
     descricao: 'Mussarela, parmesão, provolone, requeijão cremoso e oregano.',
     variacoes: [
@@ -174,7 +174,7 @@ const PRODUTOS = [
     ],
   },
   {
-    id: 'p14', categoriaId: 'premium', emoji: '🍆',
+    id: 'p16', categoriaId: 'premium', emoji: '🍆',
     nome: 'Carne seca',
     descricao: 'Mussarela, carne seca, requeijão cremoso, cebola  e orégano.',
     variacoes: [
@@ -183,7 +183,7 @@ const PRODUTOS = [
     ],
   },
   {
-    id: 'p15', categoriaId: 'premium', emoji: '🍆',
+    id: 'p17', categoriaId: 'premium', emoji: '🍆',
     nome: 'Frango com cheddar e bacon',
     descricao: 'Mussarela, frango, bacon, cheddar e orégano.',
     variacoes: [
@@ -192,7 +192,7 @@ const PRODUTOS = [
     ],
   },
   {
-    id: 'p15', categoriaId: 'premium', emoji: '🍆',
+    id: 'p18', categoriaId: 'premium', emoji: '🍆',
     nome: 'Frango caipira',
     descricao: 'Mussarela, frango, milho, requeijão cremoso e orégano.',
     variacoes: [
@@ -203,7 +203,7 @@ const PRODUTOS = [
 
   // ---------------- PIZZAS DOCES ----------------
   {
-    id: 'p16', categoriaId: 'doces', emoji: '🍫',
+    id: 'p19', categoriaId: 'doces', emoji: '🍫',
     nome: 'Romeu e Julieta',
     descricao: 'Mussarela, queijo e Goiabada — o clássico queridinho do Brasil.',
     variacoes: [
@@ -212,7 +212,7 @@ const PRODUTOS = [
     ],
   },
   {
-    id: 'p17', categoriaId: 'doces', emoji: '🍌',
+    id: 'p20', categoriaId: 'doces', emoji: '🍌',
     nome: 'Banana',
     descricao: 'Mussarela, banana, açucar e canela.',
     variacoes: [
@@ -221,7 +221,7 @@ const PRODUTOS = [
     ],
   },
   {
-    id: 'p18', categoriaId: 'doces', emoji: '🍬',
+    id: 'p21', categoriaId: 'doces', emoji: '🍬',
     nome: 'Banana Nevada',
     descricao: 'Uma pitada de mussarela, banana, açucar, canela e chocolate branco.',
     variacoes: [
@@ -230,7 +230,7 @@ const PRODUTOS = [
     ],
   },
   {
-    id: 'p19', categoriaId: 'doces', emoji: '🍬',
+    id: 'p22', categoriaId: 'doces', emoji: '🍬',
     nome: 'Churros',
     descricao: 'Mussarela, doce de leite, açucar e canela - Trazendo o sabor irresistível do tradicional churros em cada fatia.',
     variacoes: [
@@ -239,7 +239,7 @@ const PRODUTOS = [
     ],
   },
   {
-    id: 'p20', categoriaId: 'doces', emoji: '🍬',
+    id: 'p23', categoriaId: 'doces', emoji: '🍬',
     nome: 'Banoffe',
     descricao: 'Uma pitada de mussarela, banana, açucar, canela e doce de leite.',
     variacoes: [
@@ -248,7 +248,7 @@ const PRODUTOS = [
     ],
   },
   {
-    id: 'p21', categoriaId: 'doces', emoji: '🍬',
+    id: 'p24', categoriaId: 'doces', emoji: '🍬',
     nome: 'Chocolate ao leite',
     descricao: 'Mussarela, chocolate ao leite e confetes coloridos - trazendo uma combinação divertida, cremosa e irresistível.',
     variacoes: [
@@ -257,7 +257,7 @@ const PRODUTOS = [
     ],
   },
   {
-    id: 'p22', categoriaId: 'doces', emoji: '🍬',
+    id: 'p25', categoriaId: 'doces', emoji: '🍬',
     nome: 'Chocoduo',
     descricao: 'uma pitada de mussarela, chocolate ao leite e chocolate branco.',
     variacoes: [
@@ -268,43 +268,43 @@ const PRODUTOS = [
 
   // ---------------- BORDAS RECHEADAS ----------------
   {
-    id: 'p23', categoriaId: 'bordas', emoji: '🧀',
+    id: 'p26', categoriaId: 'bordas', emoji: '🧀',
     nome: 'Borda de Requeijão cremoso',
     descricao: 'Adicione uma borda generosa recheada com requeijão cremoso.',
     variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 14.00 }],
   },
   {
-    id: 'p24', categoriaId: 'bordas', emoji: '🧈',
+    id: 'p27', categoriaId: 'bordas', emoji: '🧈',
     nome: 'Borda de Cheddar',
     descricao: 'Borda recheada com cheddar cremoso derretido.',
     variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 14.00 }],
   },
   {
-    id: 'p25', categoriaId: 'bordas', emoji: '🧈',
+    id: 'p28', categoriaId: 'bordas', emoji: '🧈',
     nome: 'Borda Frango com requeijão',
     descricao: 'Borda recheada com frango e requeijão cremoso.',
     variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 17.00 }],
   },
   {
-    id: 'p26', categoriaId: 'bordas', emoji: '🧈',
+    id: 'p29', categoriaId: 'bordas', emoji: '🧈',
     nome: 'Borda Queijo com presunto',
     descricao: 'Borda recheada com queijo derretido e presunto.',
     variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 17.00 }],
   },
   {
-    id: 'p27', categoriaId: 'bordas', emoji: '🍫',
+    id: 'p30', categoriaId: 'bordas', emoji: '🍫',
     nome: 'Borda de Chocolate ao leite',
     descricao: 'Borda recheada com chocolate ao leite — ideal para pizzas doces.',
     variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 20.00 }],
   },
   {
-    id: 'p28', categoriaId: 'bordas', emoji: '🧈',
+    id: 'p31', categoriaId: 'bordas', emoji: '🧈',
     nome: 'Borda Romeu e Julieta',
     descricao: 'Borda recheada com Goiabada e quejo derretidos.',
     variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 18.00 }],
   },
   {
-    id: 'p29', categoriaId: 'bordas', emoji: '🧈',
+    id: 'p32', categoriaId: 'bordas', emoji: '🧈',
     nome: 'Borda de doce de leite',
     descricao: 'Borda recheada com doce de leite delicioso.',
     variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 18.00 }],
@@ -312,19 +312,19 @@ const PRODUTOS = [
 
   // ---------------- BEBIDAS ----------------
   {
-    id: 'p30', categoriaId: 'bebidas', emoji: '🥤',
+    id: 'p33', categoriaId: 'bebidas', emoji: '🥤',
     nome: 'Coca-Cola 1,5L',
     descricao: 'Coca-Cola 1,5L gelada.',
     variacoes: [{ id: 'unica', nome: '1,5 litros', preco: 12.00 }],
   },
   {
-    id: 'p31', categoriaId: 'bebidas', emoji: '🍾',
+    id: 'p34', categoriaId: 'bebidas', emoji: '🍾',
     nome: 'Fanta Uva 1,5L',
     descricao: 'Fanta Uva de 2 litros, gelada.',
     variacoes: [{ id: 'unica', nome: '2 litros', preco: 10.00 }],
   },
   {
-    id: 'p32', categoriaId: 'bebidas', emoji: '🧃',
+    id: 'p35', categoriaId: 'bebidas', emoji: '🧃',
     nome: 'Guaraná Antártica',
     descricao: 'Guanará de 1,5L.',
     variacoes: [{ id: 'unica', nome: '1,5 litros', preco: 12.00 }],
@@ -332,31 +332,31 @@ const PRODUTOS = [
   
   // ---------------- COMBOS ----------------
   {
-    id: 'p33', categoriaId: 'combos', emoji: '',
+    id: 'p36', categoriaId: 'combos', emoji: '',
     nome: 'Combo Tradicional',
     descricao: '2 pizzas gigantes (calabresa, presunto ou mussarela) + 1 coca-cola 1,5 litros',
     variacoes: [{ id: 'unica', nome: 'Combo Tradicional', preco: 134.99 }],
   },
   {
-    id: 'p34', categoriaId: 'combos', emoji: '',
+    id: 'p37', categoriaId: 'combos', emoji: '',
     nome: 'Combo Lagoinha',
     descricao: '1 pizza gigante salgada (exceto sabor premium) + 1 pizza grande doce + 1 coca-cola 1,5 litros',
     variacoes: [{ id: 'unica', nome: 'Combo Lagoinha', preco: 129.99 }],
   },
   {
-    id: 'p35', categoriaId: 'combos', emoji: '',
+    id: 'p38', categoriaId: 'combos', emoji: '',
     nome: 'Super Combo',
     descricao: '2 pizzas gigantes + 1 pizza grande + 1 coca-cola 1,5 litros',
     variacoes: [{ id: 'unica', nome: 'Super Combo', preco: 199.99 }],
   },
   {
-    id: 'p36', categoriaId: 'combos', emoji: '',
+    id: 'p39', categoriaId: 'combos', emoji: '',
     nome: 'Combo Casal',
     descricao: '2 pizzas grandes qualquer sabor + 1 coca-cola 1,5 litros',
     variacoes: [{ id: 'unica', nome: 'Combo casal', preco: 109.99 }],
   },
   {
-    id: 'p37', categoriaId: 'combos', emoji: '',
+    id: 'p40', categoriaId: 'combos', emoji: '',
     nome: 'Trio Grande',
     descricao: '3 pizzas grandes qualquer sabor + 2 coca-cola 1,5 litros',
     variacoes: [{ id: 'unica', nome: 'Trio Grande', preco: 169.99 }],
