@@ -297,6 +297,7 @@ h1, h2, h3 {
 }
 .navegacao-categorias__lista::-webkit-scrollbar {
   display: none;
+
 }
 .navegacao-categorias__botao {
   background: transparent;
@@ -404,6 +405,9 @@ h1, h2, h3 {
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+#mensagemSemResultado{
+  color: var(--cor-texto);
 }
 
 /* -------------------- 7. BOTÕES -------------------- */

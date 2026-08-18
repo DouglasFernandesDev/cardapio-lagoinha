@@ -42,7 +42,7 @@ const PRODUTOS = [
       { id: 'grande', nome: 'Grande · 6 fatias', preco: 44.99 },
       { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 64.99 },
     ],
-  },
+  },  
   {
     id: 'p02', categoriaId: 'tradicionais', emoji: '🌶️',
     nome: 'Calabresa',
