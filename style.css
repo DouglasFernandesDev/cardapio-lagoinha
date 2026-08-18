@@ -28,7 +28,7 @@
   --cor-escura-borda: #591B14;
 
   /* Texto */
-  --cor-texto: #3A1109;
+  --cor-texto: black;
   --cor-texto-suave: #8A5C4E;
   --cor-texto-claro: #FFF8E9;
   --cor-texto-claro-suave: #F2C9A8;
@@ -90,33 +90,19 @@ html {
      então esta propriedade seria redundante mesmo se não causasse
      problema nenhum. */
 }
-body,
-h1,
-h2,
-h3,
-p,
-figure,
-blockquote,
-dl,
-dd,
-fieldset {
+body, h1, h2, h3, p, figure, blockquote, dl, dd, fieldset {
   margin: 0;
 }
-ul,
-ol {
+ul, ol {
   margin: 0;
   padding: 0;
   list-style: none;
 }
-img,
-picture {
+img, picture {
   max-width: 100%;
   display: block;
 }
-input,
-button,
-textarea,
-select {
+input, button, textarea, select {
   font: inherit;
   color: inherit;
 }
@@ -176,9 +162,7 @@ body {
   outline-offset: 2px;
 }
 
-h1,
-h2,
-h3 {
+h1, h2, h3 {
   font-family: var(--fonte-display);
   font-weight: 700;
   line-height: 1.1;
@@ -190,7 +174,7 @@ h3 {
 
 /* -------------------- 4. CABEÇALHO -------------------- */
 .cabecalho__faixa-superior {
-  background: var(--gradiente-forno);
+  background-color: var(--cor-vermelho);
   color: var(--cor-texto-claro);
   position: relative;
   overflow: hidden;
@@ -200,7 +184,7 @@ h3 {
   position: absolute;
   inset: auto -20% -60% -20%;
   height: 140%;
-  background: radial-gradient(closest-side, rgba(255, 198, 39, 0.22), transparent 70%);
+  /*background: radial-gradient(closest-side, rgba(255, 198, 39, 0.22), transparent 70%);*/
   pointer-events: none;
 }
 
@@ -228,7 +212,7 @@ h3 {
   font-size: 0.68rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--cor-amarelo-claro);
+  color: var(--cor-texto-claro);
 }
 
 .cabecalho__status {
@@ -266,7 +250,7 @@ h3 {
 
 .cabecalho__horario {
   font-size: 0.78rem;
-  color: var(--cor-texto-claro-suave);
+  color: var(--cor-texto-claro);
 }
 
 .campo-busca {
@@ -300,7 +284,7 @@ h3 {
 }
 
 .navegacao-categorias {
-  background: var(--cor-escura-clara);
+  background: var(--cor-texto-claro); /* var(--cor-escura-clara)*/
   border-bottom: 1px solid var(--cor-escura-borda);
   position: sticky;
   top: 0;
@@ -317,7 +301,7 @@ h3 {
 .navegacao-categorias__botao {
   background: transparent;
   border: none;
-  color: var(--cor-texto-claro-suave);
+  color: black; /*var(--cor-texto-claro-suave)*/
   font-weight: 600;
   font-size: 0.85rem;
   white-space: nowrap;
@@ -326,7 +310,7 @@ h3 {
   transition: color var(--transicao-rapida), border-color var(--transicao-rapida);
 }
 .navegacao-categorias__botao:hover {
-  color: var(--cor-texto-claro);
+  color: var(--cor-amarelo);
 }
 .navegacao-categorias__botao[aria-current="true"] {
   color: var(--cor-amarelo);
@@ -366,7 +350,7 @@ h3 {
   box-shadow: var(--sombra-media);
 }
 .cartao-produto__emoji-area {
-  background: var(--gradiente-forno);
+  background: var(--cor-vermelho);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -378,7 +362,7 @@ h3 {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 198, 39, 0.3), transparent 60%);
+  /*background: radial-gradient(circle at 30% 20%, rgba(255, 198, 39, 0.3), transparent 60%);*/
   pointer-events: none;
 }
 .cartao-produto__emoji-fallback {
@@ -399,7 +383,7 @@ h3 {
 }
 .cartao-produto__descricao {
   font-size: 0.82rem;
-  color: var(--cor-texto-suave);
+  color: rgba(0, 0, 0, 0.842);
   line-height: 1.45;
 }
 .cartao-produto__rodape {
@@ -470,8 +454,8 @@ h3 {
 }
 
 .botao--adicionar-cartao {
-  background: var(--cor-escura);
-  color: var(--cor-creme);
+  background: var(--cor-vermelho);
+  color: var(--cor-texto-claro);
   font-size: 0.78rem;
   padding: 0.5rem 0.9rem;
 }
@@ -482,13 +466,12 @@ h3 {
 .botao--bloco {
   width: 100%;
 }
-
 /* -------------------- 8. BOTÃO FLUTUANTE CARRINHO -------------------- */
 .botao-carrinho-flutuante {
   position: fixed;
   z-index: var(--camada-flutuante);
-  background: var(--cor-escura);
-  color: var(--cor-creme);
+  background: var(--cor-vermelho-escuro);
+  color: var(--cor-texto-claro);
   border: none;
   border-radius: var(--raio-pilula);
   box-shadow: var(--sombra-forte);
@@ -500,7 +483,7 @@ h3 {
   animation: entrar-flutuante var(--transicao-media);
 }
 .botao-carrinho-flutuante:hover {
-  background: var(--cor-escura-clara);
+  background:  var(--cor-vermelho);
 }
 .botao-carrinho-flutuante__contador {
   background: var(--cor-amarelo);
@@ -580,7 +563,7 @@ h3 {
 }
 
 .modal-produto__cabecalho {
-  background: var(--gradiente-forno);
+  background: var(--cor-vermelho);
   color: var(--cor-texto-claro);
   text-align: center;
 }
@@ -621,7 +604,7 @@ h3 {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--cor-texto-suave);
+  color: var(--cor-texto);
   display: block;
 }
 
@@ -732,26 +715,24 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--cor-escura);
+  background: var(--cor-vermelho-escuro);
   color: var(--cor-creme);
 }
 .painel-lateral__cabecalho h2 {
   font-style: italic;
   font-size: 1.2rem;
-  color: var(--cor-creme);
+  color: var(--cor-texto-claro);
 }
-.painel-lateral__fechar,
-.painel-lateral__voltar {
+.painel-lateral__fechar, .painel-lateral__voltar {
   background: rgba(255, 248, 233, 0.1);
   border: none;
-  color: var(--cor-creme);
+  color: var(--cor-texto-claro);
   width: 32px;
   height: 32px;
   border-radius: 50%;
   font-size: 1rem;
 }
-.painel-lateral__fechar:hover,
-.painel-lateral__voltar:hover {
+.painel-lateral__fechar:hover, .painel-lateral__voltar:hover {
   background: rgba(255, 248, 233, 0.2);
 }
 
@@ -920,8 +901,7 @@ h3 {
   font-weight: 400;
   text-transform: none;
 }
-.campo input,
-.campo textarea {
+.campo input, .campo textarea {
   border: 1.5px solid var(--cor-borda-forte);
   border-radius: var(--raio-md);
   padding: 0.65rem 0.85rem;
@@ -930,8 +910,7 @@ h3 {
   font-weight: 400;
   background: var(--cor-creme);
 }
-.campo input:focus,
-.campo textarea:focus {
+.campo input:focus, .campo textarea:focus {
   border-color: var(--cor-vermelho);
   outline: none;
 }
@@ -941,7 +920,7 @@ h3 {
 
 .opcoes-segmentadas {
   display: flex;
-  background: var(--cor-creme-escuro);
+  /*background: var(--cor-creme-escuro);*/
   border-radius: var(--raio-pilula);
   padding: 0.3rem;
 }
@@ -964,12 +943,13 @@ h3 {
   border-radius: var(--raio-pilula);
   font-weight: 700;
   font-size: 0.82rem;
-  color: var(--cor-texto-suave);
+  color: var(--cor-texto);
   transition: background var(--transicao-rapida), color var(--transicao-rapida);
 }
+
 .opcao-segmentada:has(input:checked) span {
-  background: var(--cor-escura);
-  color: var(--cor-creme);
+  background: var(--cor-vermelho-escuro);
+  color: var(--cor-texto-claro);
 }
 
 .opcoes-pagamento {
@@ -1064,8 +1044,8 @@ h3 {
 
 /* -------------------- 14. RODAPÉ -------------------- */
 .rodape {
-  background: var(--cor-escura);
-  color: var(--cor-texto-claro-suave);
+  background: var(--cor-vermelho-escuro);
+  color: var(--cor-texto-claro);
   text-align: center;
   font-size: 0.78rem;
 }
@@ -1079,7 +1059,7 @@ h3 {
 
 .mensagem-sem-resultado {
   text-align: center;
-  color: var(--cor-texto-suave);
+  color: var(--cor-texto-claro);
   padding: 3rem 1rem;
   font-style: italic;
   font-family: var(--fonte-display);

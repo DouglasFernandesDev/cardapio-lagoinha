@@ -11,8 +11,8 @@
 const CONFIGURACAO = {
   // Número do WhatsApp com código do país + DDD, somente dígitos.
   // Exemplo: 55 (Brasil) + 21 (DDD) + número.
-  numeroWhatsapp: '5521999999999',
-  nomeLoja: 'Pizzaria Nonna Bella',
+  numeroWhatsapp: '5522997177127',
+  nomeLoja: 'Pizzaria Lagoinha',
   taxaEntrega: 6.0,
   horarioFuncionamento: { abre: 18, fecha: 23.5 }, // 23.5 = 23h30
   chavePix: 'contato@nonnabella.com.br',
@@ -23,217 +23,343 @@ const CONFIGURACAO = {
    ========================================================================= */
 const CATEGORIAS = [
   { id: 'tradicionais', nome: 'Pizzas Tradicionais', icone: '🍕' },
-  { id: 'especiais', nome: 'Especiais da Casa', icone: '⭐' },
+  { id: 'especiais', nome: 'Especiais', icone: '⭐' },
+  { id: 'premium', nome: 'Premium', icone: '⭐' },
   { id: 'doces', nome: 'Pizzas Doces', icone: '🍫' },
   { id: 'bordas', nome: 'Bordas Recheadas', icone: '🧀' },
   { id: 'bebidas', nome: 'Bebidas', icone: '🥤' },
-  { id: 'sobremesas', nome: 'Sobremesas', icone: '🍮' },
+  { id: 'combos', nome: 'Combos', icone: '🍹'},
 ];
 
 const PRODUTOS = [
   // ---------------- PIZZAS TRADICIONAIS ----------------
+
   {
     id: 'p01', categoriaId: 'tradicionais', emoji: '🍕',
-    nome: 'Marguerita',
-    descricao: 'Molho de tomate artesanal, mussarela, tomate fresco, manjericão e azeite extravirgem.',
+    nome: 'Mussarela',
+    descricao: 'Mussarela e orégano',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 46.90 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 58.90 },
-      { id: 'familia', nome: 'Família · 12 fatias', preco: 76.90 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 44.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 64.99 },
     ],
   },
   {
     id: 'p02', categoriaId: 'tradicionais', emoji: '🌶️',
     nome: 'Calabresa',
-    descricao: 'Molho de tomate, mussarela, calabresa fatiada, cebola roxa e orégano.',
+    descricao: 'Mussarela, calabresa e orégano.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 44.90 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 56.90 },
-      { id: 'familia', nome: 'Família · 12 fatias', preco: 74.90 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 44.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 64.99 },
     ],
   },
   {
     id: 'p03', categoriaId: 'tradicionais', emoji: '🍗',
-    nome: 'Frango com Catupiry',
-    descricao: 'Frango desfiado temperado, catupiry cremoso, milho e orégano.',
+    nome: 'Presunto',
+    descricao: 'Mussarela, presuntop e orégano.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 47.90 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 59.90 },
-      { id: 'familia', nome: 'Família · 12 fatias', preco: 78.90 },
-    ],
-  },
-  {
-    id: 'p04', categoriaId: 'tradicionais', emoji: '🥚',
-    nome: 'Portuguesa',
-    descricao: 'Presunto, ovos, cebola, azeitona, ervilha e mussarela.',
-    variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 47.90 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 59.90 },
-      { id: 'familia', nome: 'Família · 12 fatias', preco: 78.90 },
-    ],
-  },
-  {
-    id: 'p05', categoriaId: 'tradicionais', emoji: '🧀',
-    nome: 'Quatro Queijos',
-    descricao: 'Mussarela, provolone, parmesão e gorgonzola sobre molho branco.',
-    variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 49.90 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 62.90 },
-      { id: 'familia', nome: 'Família · 12 fatias', preco: 81.90 },
-    ],
-  },
-  {
-    id: 'p06', categoriaId: 'tradicionais', emoji: '🍕',
-    nome: 'Pepperoni',
-    descricao: 'Molho de tomate, mussarela, pepperoni fatiado e orégano.',
-    variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 48.90 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 60.90 },
-      { id: 'familia', nome: 'Família · 12 fatias', preco: 79.90 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 44.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 64.99 },
     ],
   },
 
-  // ---------------- ESPECIAIS DA CASA ----------------
+  // ---------------- ESPECIAIS----------------
+  {
+    id: 'p04', categoriaId: 'especiais', emoji: '🥚',
+    nome: 'Portuguesa',
+    descricao: 'Mussarela, presunto, calabresa, tomate, pimentão, cebola, palmito, ovo e orégano.',
+    variacoes: [
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
+    ],
+  },
+  {
+    id: 'p05', categoriaId: 'especiais', emoji: '🧀',
+    nome: 'Calabresa com cebola',
+    descricao: 'Mussarela, calabresa, cebola e orégano.',
+    variacoes: [
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 46.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 66.99 },
+    ],
+  },
+  {
+    id: 'p06', categoriaId: 'especiais', emoji: '🍕',
+    nome: 'Calabresa com Requeijão',
+    descricao: 'Mussarela, calabresa, cebola e orégano.',
+    variacoes: [
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 69.99 },
+    ],
+  },
   {
     id: 'p07', categoriaId: 'especiais', emoji: '🌿',
-    nome: 'Nonna Bella',
-    descricao: 'Presunto de parma, rúcula fresca, tomate seco e lascas de parmesão.',
+    nome: 'Frango com Requeijão',
+    descricao: 'Mussarela, frango, requeijão cremoso e orégano.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 56.90 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 69.90 },
-      { id: 'familia', nome: 'Família · 12 fatias', preco: 89.90 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
     ],
   },
   {
     id: 'p08', categoriaId: 'especiais', emoji: '🫒',
-    nome: 'Toscana',
-    descricao: 'Linguiça toscana defumada, pimentão, cebola roxa e azeitona preta.',
+    nome: 'Mista',
+    descricao: 'Mussarela, presunto, calabresa, tomate, pimentão, cebola, palmito, ovo e orégano.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 52.90 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 65.90 },
-      { id: 'familia', nome: 'Família · 12 fatias', preco: 84.90 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
     ],
   },
   {
     id: 'p09', categoriaId: 'especiais', emoji: '🐃',
-    nome: 'Búfala',
-    descricao: 'Mussarela de búfala, tomate cereja, manjericão fresco e azeite trufado.',
+    nome: 'Alho torrado',
+    descricao: 'Mussarela, alho torrado e orégano.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 57.90 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 71.90 },
-      { id: 'familia', nome: 'Família · 12 fatias', preco: 92.90 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
     ],
   },
   {
     id: 'p10', categoriaId: 'especiais', emoji: '🍆',
-    nome: 'Vegetariana Grelhada',
-    descricao: 'Berinjela, abobrinha, pimentão e cebola caramelizada com mussarela.',
+    nome: 'Peito de Peru',
+    descricao: 'Mussarela, peito de peru e orégano.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 49.90 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 62.90 },
-      { id: 'familia', nome: 'Família · 12 fatias', preco: 81.90 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
+    ],
+  },
+  {
+    id: 'p10', categoriaId: 'especiais', emoji: '🍆',
+    nome: 'Bacon',
+    descricao: 'Mussarela, bacon e orégano.',
+    variacoes: [
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
+    ],
+  },
+  {
+    id: 'p10', categoriaId: 'especiais', emoji: '🍆',
+    nome: 'Bacon com ovos',
+    descricao: 'Mussarela, bacon, ovo e orégano.',
+    variacoes: [
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 51.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 72.99 },
+    ],
+  },
+
+  // ---------------- PREMIUM ----------------
+  {
+    id: 'p11', categoriaId: 'premium', emoji: '🍆',
+    nome: 'Camarão com requeijão',
+    descricao: 'Mussarela, camarão, requeijão cremoso e orégano.',
+    variacoes: [
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
+    ],
+  },
+  {
+    id: 'p12', categoriaId: 'premium', emoji: '🍆',
+    nome: 'Três porquinhos',
+    descricao: 'Mussarela, presunto, calabresa, bacon e orégano.',
+    variacoes: [
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
+    ],
+  },
+  {
+    id: 'p13', categoriaId: 'premium', emoji: '🍆',
+    nome: 'Quatro queijos',
+    descricao: 'Mussarela, parmesão, provolone, requeijão cremoso e oregano.',
+    variacoes: [
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
+    ],
+  },
+  {
+    id: 'p14', categoriaId: 'premium', emoji: '🍆',
+    nome: 'Carne seca',
+    descricao: 'Mussarela, carne seca, requeijão cremoso, cebola  e orégano.',
+    variacoes: [
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
+    ],
+  },
+  {
+    id: 'p15', categoriaId: 'premium', emoji: '🍆',
+    nome: 'Frango com cheddar e bacon',
+    descricao: 'Mussarela, frango, bacon, cheddar e orégano.',
+    variacoes: [
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
+    ],
+  },
+  {
+    id: 'p15', categoriaId: 'premium', emoji: '🍆',
+    nome: 'Frango caipira',
+    descricao: 'Mussarela, frango, milho, requeijão cremoso e orégano.',
+    variacoes: [
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
     ],
   },
 
   // ---------------- PIZZAS DOCES ----------------
   {
-    id: 'p11', categoriaId: 'doces', emoji: '🍫',
-    nome: 'Chocolate com Morango',
-    descricao: 'Chocolate ao leite derretido e morangos frescos fatiados.',
-    variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 44.90 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 56.90 },
-    ],
-  },
-  {
-    id: 'p12', categoriaId: 'doces', emoji: '🍌',
-    nome: 'Banana com Canela',
-    descricao: 'Banana caramelizada, canela e fio generoso de doce de leite.',
-    variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 42.90 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 54.90 },
-    ],
-  },
-  {
-    id: 'p13', categoriaId: 'doces', emoji: '🍬',
+    id: 'p16', categoriaId: 'doces', emoji: '🍫',
     nome: 'Romeu e Julieta',
-    descricao: 'Goiabada derretida e mussarela — o clássico queridinho do Brasil.',
+    descricao: 'Mussarela, queijo e Goiabada — o clássico queridinho do Brasil.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 41.90 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 53.90 },
+      { id: 'media', nome: 'Média · 6 fatias', preco: 44.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 67.99 },
+    ],
+  },
+  {
+    id: 'p17', categoriaId: 'doces', emoji: '🍌',
+    nome: 'Banana',
+    descricao: 'Mussarela, banana, açucar e canela.',
+    variacoes: [
+      { id: 'media', nome: 'Média · 6 fatias', preco: 44.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 67.99 },
+    ],
+  },
+  {
+    id: 'p18', categoriaId: 'doces', emoji: '🍬',
+    nome: 'Banana Nevada',
+    descricao: 'Uma pitada de mussarela, banana, açucar, canela e chocolate branco.',
+    variacoes: [
+      { id: 'media', nome: 'Média · 6 fatias', preco: 54.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 80.99 },
+    ],
+  },
+  {
+    id: 'p19', categoriaId: 'doces', emoji: '🍬',
+    nome: 'Churros',
+    descricao: 'Mussarela, doce de leite, açucar e canela - Trazendo o sabor irresistível do tradicional churros em cada fatia.',
+    variacoes: [
+      { id: 'media', nome: 'Média · 6 fatias', preco: 51.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 77.99 },
+    ],
+  },
+  {
+    id: 'p20', categoriaId: 'doces', emoji: '🍬',
+    nome: 'Banoffe',
+    descricao: 'Uma pitada de mussarela, banana, açucar, canela e doce de leite.',
+    variacoes: [
+      { id: 'media', nome: 'Média · 6 fatias', preco: 51.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 77.99 },
+    ],
+  },
+  {
+    id: 'p21', categoriaId: 'doces', emoji: '🍬',
+    nome: 'Chocolate ao leite',
+    descricao: 'Mussarela, chocolate ao leite e confetes coloridos - trazendo uma combinação divertida, cremosa e irresistível.',
+    variacoes: [
+      { id: 'media', nome: 'Média · 6 fatias', preco: 51.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 77.99 },
+    ],
+  },
+  {
+    id: 'p22', categoriaId: 'doces', emoji: '🍬',
+    nome: 'Chocoduo',
+    descricao: 'uma pitada de mussarela, chocolate ao leite e chocolate branco.',
+    variacoes: [
+      { id: 'media', nome: 'Média · 6 fatias', preco: 54.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 80.99 },
     ],
   },
 
   // ---------------- BORDAS RECHEADAS ----------------
   {
-    id: 'p14', categoriaId: 'bordas', emoji: '🧀',
-    nome: 'Borda de Catupiry',
-    descricao: 'Adicione uma borda generosa recheada com catupiry cremoso.',
-    variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 9.90 }],
+    id: 'p23', categoriaId: 'bordas', emoji: '🧀',
+    nome: 'Borda de Requeijão cremoso',
+    descricao: 'Adicione uma borda generosa recheada com requeijão cremoso.',
+    variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 14.00 }],
   },
   {
-    id: 'p15', categoriaId: 'bordas', emoji: '🧈',
+    id: 'p24', categoriaId: 'bordas', emoji: '🧈',
     nome: 'Borda de Cheddar',
     descricao: 'Borda recheada com cheddar cremoso derretido.',
-    variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 9.90 }],
+    variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 14.00 }],
   },
   {
-    id: 'p16', categoriaId: 'bordas', emoji: '🍫',
-    nome: 'Borda de Chocolate',
+    id: 'p25', categoriaId: 'bordas', emoji: '🧈',
+    nome: 'Borda Frango com requeijão',
+    descricao: 'Borda recheada com frango e requeijão cremoso.',
+    variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 17.00 }],
+  },
+  {
+    id: 'p26', categoriaId: 'bordas', emoji: '🧈',
+    nome: 'Borda Queijo com presunto',
+    descricao: 'Borda recheada com queijo derretido e presunto.',
+    variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 17.00 }],
+  },
+  {
+    id: 'p27', categoriaId: 'bordas', emoji: '🍫',
+    nome: 'Borda de Chocolate ao leite',
     descricao: 'Borda recheada com chocolate ao leite — ideal para pizzas doces.',
-    variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 11.90 }],
+    variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 20.00 }],
+  },
+  {
+    id: 'p28', categoriaId: 'bordas', emoji: '🧈',
+    nome: 'Borda Romeu e Julieta',
+    descricao: 'Borda recheada com Goiabada e quejo derretidos.',
+    variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 18.00 }],
+  },
+  {
+    id: 'p29', categoriaId: 'bordas', emoji: '🧈',
+    nome: 'Borda de doce de leite',
+    descricao: 'Borda recheada com doce de leite delicioso.',
+    variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 18.00 }],
   },
 
   // ---------------- BEBIDAS ----------------
   {
-    id: 'p17', categoriaId: 'bebidas', emoji: '🥤',
-    nome: 'Refrigerante Lata',
-    descricao: 'Coca-Cola, Guaraná ou Fanta — 350ml, gelada.',
-    variacoes: [{ id: 'unica', nome: '350ml', preco: 7.00 }],
+    id: 'p30', categoriaId: 'bebidas', emoji: '🥤',
+    nome: 'Coca-Cola 1,5L',
+    descricao: 'Coca-Cola 1,5L gelada.',
+    variacoes: [{ id: 'unica', nome: '1,5 litros', preco: 12.00 }],
   },
   {
-    id: 'p18', categoriaId: 'bebidas', emoji: '🍾',
-    nome: 'Refrigerante 2L',
-    descricao: 'Coca-Cola ou Guaraná — garrafa de 2 litros, gelada.',
-    variacoes: [{ id: 'unica', nome: '2 litros', preco: 15.00 }],
+    id: 'p31', categoriaId: 'bebidas', emoji: '🍾',
+    nome: 'Fanta Uva 1,5L',
+    descricao: 'Fanta Uva de 2 litros, gelada.',
+    variacoes: [{ id: 'unica', nome: '2 litros', preco: 10.00 }],
   },
   {
-    id: 'p19', categoriaId: 'bebidas', emoji: '🧃',
-    nome: 'Suco Natural',
-    descricao: 'Laranja, limão ou maracujá — feito na hora, 500ml.',
-    variacoes: [{ id: 'unica', nome: '500ml', preco: 11.00 }],
+    id: 'p32', categoriaId: 'bebidas', emoji: '🧃',
+    nome: 'Guaraná Antártica',
+    descricao: 'Guanará de 1,5L.',
+    variacoes: [{ id: 'unica', nome: '1,5 litros', preco: 12.00 }],
+  },
+  
+  // ---------------- COMBOS ----------------
+  {
+    id: 'p25', categoriaId: 'combos', emoji: '',
+    nome: 'Combo Tradicional',
+    descricao: '2 pizzas gigantes (calabresa, presunto ou mussarela) + 1 coca-cola 1,5 litros',
+    variacoes: [{ id: 'unica', nome: 'Combo Tradicional', preco: 134.99 }],
   },
   {
-    id: 'p20', categoriaId: 'bebidas', emoji: '🍺',
-    nome: 'Cerveja Long Neck',
-    descricao: 'Long neck gelada — ótima parceira da pizza.',
-    variacoes: [{ id: 'unica', nome: '355ml', preco: 12.00 }],
+    id: 'p26', categoriaId: 'combos', emoji: '',
+    nome: 'Combo Lagoinha',
+    descricao: '1 pizza gigante salgada (exceto sabor premium) + 1 pizza grande doce + 1 coca-cola 1,5 litros',
+    variacoes: [{ id: 'unica', nome: 'Combo Lagoinha', preco: 129.99 }],
   },
   {
-    id: 'p21', categoriaId: 'bebidas', emoji: '💧',
-    nome: 'Água Mineral',
-    descricao: 'Com ou sem gás, 500ml.',
-    variacoes: [{ id: 'unica', nome: '500ml', preco: 5.00 }],
-  },
-
-  // ---------------- SOBREMESAS ----------------
-  {
-    id: 'p22', categoriaId: 'sobremesas', emoji: '🍮',
-    nome: 'Petit Gâteau',
-    descricao: 'Bolinho de chocolate quente com recheio cremoso e sorvete de creme.',
-    variacoes: [{ id: 'unica', nome: 'Porção individual', preco: 19.90 }],
+    id: 'p27', categoriaId: 'combos', emoji: '',
+    nome: 'Super Combo',
+    descricao: '2 pizzas gigantes + 1 pizza grande + 1 coca-cola 1,5 litros',
+    variacoes: [{ id: 'unica', nome: 'Super Combo', preco: 199.99 }],
   },
   {
-    id: 'p23', categoriaId: 'sobremesas', emoji: '🍨',
-    nome: 'Brownie com Sorvete',
-    descricao: 'Brownie de chocolate meio amargo com bola de sorvete de creme.',
-    variacoes: [{ id: 'unica', nome: 'Porção individual', preco: 17.90 }],
+    id: 'p28', categoriaId: 'combos', emoji: '',
+    nome: 'Combo Casal',
+    descricao: '2 pizzas grandes qualquer sabor + 1 coca-cola 1,5 litros',
+    variacoes: [{ id: 'unica', nome: 'Combo casal', preco: 109.99 }],
   },
   {
-    id: 'p24', categoriaId: 'sobremesas', emoji: '🍹',
-    nome: 'Mousse de Maracujá',
-    descricao: 'Mousse aerado e cremoso, com calda de maracujá fresco.',
-    variacoes: [{ id: 'unica', nome: 'Porção individual', preco: 14.90 }],
+    id: 'p29', categoriaId: 'combos', emoji: '',
+    nome: 'Trio Grande',
+    descricao: '3 pizzas grandes qualquer sabor + 2 coca-cola 1,5 litros',
+    variacoes: [{ id: 'unica', nome: 'Trio Grande', preco: 169.99 }],
   },
 ];
 
@@ -784,7 +910,7 @@ function removerItemCarrinho(idItem) {
 
 function salvarCarrinhoLocalStorage() {
   try {
-    localStorage.setItem('nonnaBellaCarrinho', JSON.stringify(estado.carrinho));
+    localStorage.setItem('lagoinhaCarrinho', JSON.stringify(estado.carrinho));
   } catch (erro) {
     console.warn('Não foi possível salvar o carrinho localmente:', erro);
   }
@@ -792,7 +918,7 @@ function salvarCarrinhoLocalStorage() {
 
 function carregarCarrinhoLocalStorage() {
   try {
-    const dados = localStorage.getItem('nonnaBellaCarrinho');
+    const dados = localStorage.getItem('lagoinhaCarrinho');
     if (dados) estado.carrinho = JSON.parse(dados);
   } catch (erro) {
     console.warn('Não foi possível carregar o carrinho salvo:', erro);
