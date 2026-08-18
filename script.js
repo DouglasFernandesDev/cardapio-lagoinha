@@ -84,7 +84,7 @@ const PRODUTOS = [
   {
     id: 'p06', categoriaId: 'especiais', emoji: '🍕',
     nome: 'Calabresa com Requeijão',
-    descricao: 'Mussarela, calabresa, cebola e orégano.',
+    descricao: 'Mussarela, calabresa, requeijão cremoso e orégano.',
     variacoes: [
       { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
       { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 69.99 },
@@ -332,31 +332,31 @@ const PRODUTOS = [
   
   // ---------------- COMBOS ----------------
   {
-    id: 'p25', categoriaId: 'combos', emoji: '',
+    id: 'p33', categoriaId: 'combos', emoji: '',
     nome: 'Combo Tradicional',
     descricao: '2 pizzas gigantes (calabresa, presunto ou mussarela) + 1 coca-cola 1,5 litros',
     variacoes: [{ id: 'unica', nome: 'Combo Tradicional', preco: 134.99 }],
   },
   {
-    id: 'p26', categoriaId: 'combos', emoji: '',
+    id: 'p34', categoriaId: 'combos', emoji: '',
     nome: 'Combo Lagoinha',
     descricao: '1 pizza gigante salgada (exceto sabor premium) + 1 pizza grande doce + 1 coca-cola 1,5 litros',
     variacoes: [{ id: 'unica', nome: 'Combo Lagoinha', preco: 129.99 }],
   },
   {
-    id: 'p27', categoriaId: 'combos', emoji: '',
+    id: 'p35', categoriaId: 'combos', emoji: '',
     nome: 'Super Combo',
     descricao: '2 pizzas gigantes + 1 pizza grande + 1 coca-cola 1,5 litros',
     variacoes: [{ id: 'unica', nome: 'Super Combo', preco: 199.99 }],
   },
   {
-    id: 'p28', categoriaId: 'combos', emoji: '',
+    id: 'p36', categoriaId: 'combos', emoji: '',
     nome: 'Combo Casal',
     descricao: '2 pizzas grandes qualquer sabor + 1 coca-cola 1,5 litros',
     variacoes: [{ id: 'unica', nome: 'Combo casal', preco: 109.99 }],
   },
   {
-    id: 'p29', categoriaId: 'combos', emoji: '',
+    id: 'p37', categoriaId: 'combos', emoji: '',
     nome: 'Trio Grande',
     descricao: '3 pizzas grandes qualquer sabor + 2 coca-cola 1,5 litros',
     variacoes: [{ id: 'unica', nome: 'Trio Grande', preco: 169.99 }],
