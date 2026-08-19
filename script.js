@@ -267,11 +267,12 @@ const PRODUTOS = [
   },
 
   // ---------------- BORDAS RECHEADAS ----------------
+ 
   {
-    id: 'p26', categoriaId: 'bordas', emoji: '🧀',
+    id: 'p26', categoriaId: 'bordas', emoji: '🧈',
     nome: 'Borda de Requeijão cremoso',
     descricao: 'Adicione uma borda generosa recheada com requeijão cremoso.',
-    variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 14.00 }],
+    variacoes: [{ id: 'unica', nome: 'Adicionar à pizza', preco: 14.00 }]
   },
   {
     id: 'p27', categoriaId: 'bordas', emoji: '🧈',
