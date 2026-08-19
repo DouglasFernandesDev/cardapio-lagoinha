@@ -11,7 +11,7 @@
 const CONFIGURACAO = {
   // Número do WhatsApp com código do país + DDD, somente dígitos.
   // Exemplo: 55 (Brasil) + 21 (DDD) + número.
-  numeroWhatsapp: '5522997177127',
+  numeroWhatsapp: '5522998328849',
   nomeLoja: 'Pizzaria Lagoinha',
   taxaEntrega: 6.0,
   horarioFuncionamento: { abre: 18, fecha: 23.5 }, // 23.5 = 23h30

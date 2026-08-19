@@ -174,7 +174,7 @@ h1, h2, h3 {
 
 /* -------------------- 4. CABEÇALHO -------------------- */
 .cabecalho__faixa-superior {
-  background-color: var(--cor-vermelho);
+  background-color: rgb(153, 36, 36);
   color: var(--cor-texto-claro);
   position: relative;
   overflow: hidden;
@@ -227,8 +227,8 @@ h1, h2, h3 {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--cor-amarelo);
-  box-shadow: 0 0 0 0 rgba(255, 198, 39, 0.6);
+  background: rgb(14, 231, 14);
+  box-shadow: green;
   animation: pulsar-status 2s infinite;
 }
 .cabecalho__status--fechado .cabecalho__ponto-status {
