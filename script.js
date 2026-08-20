@@ -14,7 +14,6 @@ const CONFIGURACAO = {
   numeroWhatsapp: '5522998328849',
   nomeLoja: 'Pizzaria Lagoinha',
   taxaEntrega: 6.0,
-  chavePix: 'contato@nonnabella.com.br',
 };
 
 /* Horário de funcionamento por dia da semana. O índice de cada dia
@@ -47,9 +46,12 @@ const CATEGORIAS = [
 ];
 
 /* Categorias cujos sabores podem entrar no "Monte sua Pizza". Ficam de
-   fora "doces": elas só têm variação "media"/"grande" (sem "gigante"),
-   então não teriam preço para a opção Gigante do montador — e misturar
-   sabor doce com salgado na mesma pizza também não faz sentido prático. */
+   fora "doces" por escolha de cardápio — misturar sabor doce com
+   salgado na mesma pizza não é uma combinação comum em pizzaria. (Nota:
+   hoje as pizzas doces já têm Grande e Gigante como as demais, então
+   se um dia vocês quiserem incluir sabores doces no montador, basta
+   adicionar 'doces' nesta lista — não há mais nenhum impedimento
+   técnico para isso.) */
 const CATEGORIAS_SABORES_MONTAGEM = ['tradicionais', 'especiais', 'premium'];
 
 const PRODUTOS = [
@@ -780,7 +782,7 @@ function renderizarSecaoMontarPizza(categoria) {
       <h2 class="secao-categoria__titulo">${categoria.icone} ${categoria.nome}</h2>
       <ul class="grade-produtos">
         <li>
-          <article class="cartao-produto" data-produto-id="monte">
+          <article class="cartao-produto" data-produto-id="monte" data-nome-busca="${normalizarTexto('Monte sua Pizza personalizada sabores')}">
             <figure class="cartao-produto__emoji-area">
               <span class="cartao-produto__emoji-fallback" aria-hidden="true">🍕</span>
               <img class="cartao-produto__foto" src="${caminhoFoto}" alt="Foto do Monte sua Pizza" loading="lazy">
@@ -886,7 +888,12 @@ function configurarBusca() {
       let algumVisivelNaSecao = false;
 
       cartoes.forEach((cartao) => {
-        const corresponde = !termo || cartao.dataset.nomeBusca.includes(termo);
+        // "|| ''" é uma proteção extra: se algum cartão (hoje ou no
+        // futuro) não tiver o atributo "data-nome-busca" por engano,
+        // a busca trata como "não corresponde" em vez de travar com
+        // erro — o que impediria a filtragem de TODAS as categorias
+        // seguintes, não só desse cartão específico.
+        const corresponde = !termo || (cartao.dataset.nomeBusca || '').includes(termo);
         // O <li> é quem controla a visibilidade (o cartão em si fica sem
         // classe extra), assim a grade não deixa "buracos" de espaçamento.
         cartao.closest('li').classList.toggle('oculto', !corresponde);
@@ -1294,7 +1301,7 @@ function configurarFormularioMontagem() {
     const observacao = document.getElementById('observacaoMontagem').value.trim();
     const precoBase = calcularPrecoBaseMontagem();
     const precoBorda = estadoMontagem.bordaSelecionada ? estadoMontagem.bordaSelecionada.preco : 0;
-    const nomeTamanho = estadoMontagem.tamanho === 'gigante' ? 'Gigante · 8 fatias' : 'Grande · 6 fatias';
+    const nomeTamanho = estadoMontagem.tamanho === 'gigante' ? 'Gigante 45cm · 8 fatias' : 'Grande 35cm · 6 fatias';
     const nomesSabores = estadoMontagem.saboresSelecionados.map((s) => s.nome).join(' + ');
 
     let variacaoNomeCompleta = `${nomeTamanho} · Sabores: ${nomesSabores}`;
