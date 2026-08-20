@@ -5,12 +5,8 @@
 
 'use strict';
 
-/* =========================================================================
-   1. CONFIGURAÇÃO DA LOJA — troque pelos dados reais da pizzaria
-   ========================================================================= */
 const CONFIGURACAO = {
-  // Número do WhatsApp com código do país + DDD, somente dígitos.
-  // Exemplo: 55 (Brasil) + 21 (DDD) + número.
+ 
   numeroWhatsapp: '5522998328849',
   nomeLoja: 'Pizzaria Lagoinha',
   taxaEntrega: 6.0,
@@ -22,6 +18,7 @@ const CONFIGURACAO = {
    2. DADOS DO CARDÁPIO
    ========================================================================= */
 const CATEGORIAS = [
+  { id: 'monte', nome: 'Monte sua Pizza', icone: '🍕' },
   { id: 'tradicionais', nome: 'Pizzas Tradicionais', icone: '🍕' },
   { id: 'especiais', nome: 'Especiais', icone: '⭐' },
   { id: 'premium', nome: 'Premium', icone: '⭐' },
@@ -30,6 +27,12 @@ const CATEGORIAS = [
   { id: 'bebidas', nome: 'Bebidas', icone: '🥤' },
   { id: 'combos', nome: 'Combos', icone: '🍹'},
 ];
+
+/* Categorias cujos sabores podem entrar no "Monte sua Pizza". Ficam de
+   fora "doces": elas só têm variação "media"/"grande" (sem "gigante"),
+   então não teriam preço para a opção Gigante do montador — e misturar
+   sabor doce com salgado na mesma pizza também não faz sentido prático. */
+const CATEGORIAS_SABORES_MONTAGEM = ['tradicionais', 'especiais', 'premium'];
 
 const PRODUTOS = [
   // ---------------- PIZZAS TRADICIONAIS ----------------
@@ -374,6 +377,17 @@ const estado = {
   quantidadeSelecionada: 1,
 };
 
+/* Estado próprio do "Monte sua Pizza" — separado do "estado" normal
+   porque a montagem lida com VÁRIOS sabores ao mesmo tempo (não um só),
+   então precisa da sua própria estrutura. */
+const estadoMontagem = {
+  tamanho: 'grande',        // 'grande' ou 'gigante'
+  maxSabores: 2,             // 2 para Grande, 4 para Gigante
+  saboresSelecionados: [],   // lista de produtos (sabores) escolhidos
+  bordaSelecionada: null,
+  quantidade: 1,
+};
+
 /* =========================================================================
    4. UTILITÁRIOS
    ========================================================================= */
@@ -410,9 +424,7 @@ function buscarProdutoPorId(produtoId) {
 }
 
 /* Mostra uma notificação rápida (toast) por 3.2s, usando uma simples
-   troca de classe. Como os painéis e modais voltaram a ser divs
-   controladas por nós (em vez de <dialog> nativo competindo pela
-   camada superior do navegador), um z-index alto é suficiente para
+   troca de classe, um z-index alto é suficiente para
    garantir que o toast sempre apareça por cima de tudo. */
 function mostrarToast(mensagem, tipo = '') {
   const toast = document.getElementById('toast');
@@ -460,13 +472,66 @@ function renderizarNavegacaoCategorias() {
     </li>
   `).join('');
 
-  nav.innerHTML = `<ul class="navegacao-categorias__lista">${itens}</ul>`;
+  // O botão hambúrguer só aparece visualmente em telas de celular/tablet
+  // (ver mobile.css) — no desktop ele fica escondido e a lista de
+  // categorias volta a aparecer sempre visível, na horizontal.
+  //  Gerar os dois juntos aqui evita ter que manter duas
+  // versões de HTML/JS diferentes para cada tamanho de tela.
+  nav.innerHTML = `
+    <button
+      type="button"
+      id="botaoMenuCategorias"
+      class="navegacao-categorias__hamburguer"
+      aria-expanded="false"
+      aria-controls="listaCategoriasNav"
+      aria-label="Abrir menu de categorias"
+    >
+      <span class="navegacao-categorias__hamburguer-icone" aria-hidden="true">
+        <span class="navegacao-categorias__hamburguer-linha"></span>
+        <span class="navegacao-categorias__hamburguer-linha"></span>
+        <span class="navegacao-categorias__hamburguer-linha"></span>
+      </span>
+      <span class="navegacao-categorias__hamburguer-texto">Categorias</span>
+    </button>
+    <ul class="navegacao-categorias__lista" id="listaCategoriasNav">${itens}</ul>
+  `;
 
   nav.querySelectorAll('.navegacao-categorias__botao').forEach((botao) => {
     botao.addEventListener('click', () => {
       rolarParaSecao(botao.dataset.categoriaAlvo);
+      fecharMenuCategorias();
     });
   });
+
+  configurarMenuHamburguer();
+}
+
+/* Abre/fecha o menu suspenso de categorias (só existe visualmente em
+   telas de celular/tablet — ver mobile.css). Fecha automaticamente ao
+   escolher uma categoria ou ao clicar fora do menu. */
+function configurarMenuHamburguer() {
+  const botao = document.getElementById('botaoMenuCategorias');
+  const lista = document.getElementById('listaCategoriasNav');
+  if (!botao || !lista) return;
+
+  botao.addEventListener('click', (evento) => {
+    evento.stopPropagation();
+    const vaiAbrir = !lista.classList.contains('navegacao-categorias__lista--aberta');
+    lista.classList.toggle('navegacao-categorias__lista--aberta', vaiAbrir);
+    botao.setAttribute('aria-expanded', String(vaiAbrir));
+  });
+
+  document.addEventListener('click', (evento) => {
+    if (!evento.target.closest('#navCategorias')) fecharMenuCategorias();
+  });
+}
+
+function fecharMenuCategorias() {
+  const botao = document.getElementById('botaoMenuCategorias');
+  const lista = document.getElementById('listaCategoriasNav');
+  if (!botao || !lista) return;
+  lista.classList.remove('navegacao-categorias__lista--aberta');
+  botao.setAttribute('aria-expanded', 'false');
 }
 
 /* Calcula a posição exata da seção (medindo a altura real da barra fixa
@@ -548,6 +613,27 @@ function ajustarMargemDeRolagem() {
   document.documentElement.style.setProperty('--altura-nav-categorias', (altura + 16) + 'px');
 }
 
+/* Retorna as opções de borda disponíveis (todas as pizzas cadastradas
+   na categoria "bordas"), no formato { id, nome, preco } — os mesmos
+   valores já usados quando a borda é vendida como item avulso. */
+function obterOpcoesDeBorda() {
+  return PRODUTOS
+    .filter((produto) => produto.categoriaId === 'bordas')
+    .map((produto) => ({
+      id: produto.id,
+      nome: produto.nome,
+      preco: produto.variacoes[0].preco,
+    }));
+}
+
+/* Define em quais categorias faz sentido oferecer a escolha de borda —
+   ou seja, todas as pizzas de verdade. Fica de fora: a própria
+   categoria "bordas" (não faz sentido perguntar a borda de uma borda),
+   "bebidas" e "combos" (itens fechados, sem essa customização). */
+function precisaDeSelecaoDeBorda(categoriaId) {
+  return ['tradicionais', 'especiais', 'premium', 'doces'].includes(categoriaId);
+}
+
 function renderizarCartaoProduto(produto) {
   const menorPreco = Math.min(...produto.variacoes.map((v) => v.preco));
   const prefixo = produto.variacoes.length > 1 ? 'a partir de' : 'preço';
@@ -589,11 +675,65 @@ function configurarFallbackDeFotos(escopo) {
   });
 }
 
+/* -------------------------------------------------------------------------
+   "MONTE SUA PIZZA" — cartão especial que abre o modal de montagem
+   ------------------------------------------------------------------------- */
+
+/* Lista de sabores (produtos) elegíveis para entrar no "Monte sua
+   Pizza" — ver CATEGORIAS_SABORES_MONTAGEM. */
+function obterSaboresParaMontagem() {
+  return PRODUTOS.filter((produto) => CATEGORIAS_SABORES_MONTAGEM.includes(produto.categoriaId));
+}
+
+/* Preço "a partir de" mostrado no cartão — o sabor mais barato no
+   tamanho Grande, sem borda (o cenário mais barato possível). */
+function calcularMenorPrecoMontagem() {
+  const precos = obterSaboresParaMontagem()
+    .map((sabor) => sabor.variacoes.find((v) => v.id === 'grande'))
+    .filter(Boolean)
+    .map((variacao) => variacao.preco);
+  return precos.length ? Math.min(...precos) : 0;
+}
+
+function renderizarSecaoMontarPizza(categoria) {
+  const menorPreco = calcularMenorPrecoMontagem();
+  const caminhoFoto = 'imagens/produtos/monte.jpg';
+
+  return `
+    <section class="secao-categoria" id="categoria-${categoria.id}" data-categoria-secao>
+      <h2 class="secao-categoria__titulo">${categoria.icone} ${categoria.nome}</h2>
+      <ul class="grade-produtos">
+        <li>
+          <article class="cartao-produto" data-produto-id="monte">
+            <figure class="cartao-produto__emoji-area">
+              <span class="cartao-produto__emoji-fallback" aria-hidden="true">🍕</span>
+              <img class="cartao-produto__foto" src="${caminhoFoto}" alt="Foto do Monte sua Pizza" loading="lazy">
+            </figure>
+            <div class="cartao-produto__conteudo">
+              <h3 class="cartao-produto__nome">Monte sua Pizza</h3>
+              <p class="cartao-produto__descricao">Escolha o tamanho, até 2 sabores (Grande) ou até 4 sabores (Gigante), e a borda que quiser.</p>
+              <footer class="cartao-produto__rodape">
+                <span class="cartao-produto__preco"><span>a partir de</span>${formatarMoeda(menorPreco)}</span>
+                <button type="button" class="botao botao--adicionar-cartao" id="botaoAbrirMontarPizza">
+                  + Montar
+                </button>
+              </footer>
+            </div>
+          </article>
+        </li>
+      </ul>
+    </section>
+  `;
+}
 
 function renderizarCardapio() {
   const container = document.getElementById('listaCategorias');
 
   container.innerHTML = CATEGORIAS.map((categoria) => {
+    if (categoria.id === 'monte') {
+      return renderizarSecaoMontarPizza(categoria);
+    }
+
     const produtosDaCategoria = PRODUTOS.filter((p) => p.categoriaId === categoria.id);
     if (produtosDaCategoria.length === 0) return '';
 
@@ -610,6 +750,9 @@ function renderizarCardapio() {
   container.querySelectorAll('[data-abrir-produto]').forEach((botao) => {
     botao.addEventListener('click', () => abrirModalProduto(botao.dataset.abrirProduto));
   });
+
+  const botaoMontar = document.getElementById('botaoAbrirMontarPizza');
+  if (botaoMontar) botaoMontar.addEventListener('click', abrirModalMontarPizza);
 
   configurarFallbackDeFotos(container);
 }
@@ -690,6 +833,7 @@ function configurarBusca() {
    previsível do que compartilhar uma única sobreposição entre os três. */
 const MAPA_SOBREPOSICOES = {
   modalProduto: 'sobreposicaoProduto',
+  modalMontarPizza: 'sobreposicaoMontarPizza',
   painelCarrinho: 'sobreposicaoCarrinho',
   painelCheckout: 'sobreposicaoCheckout',
 };
@@ -735,6 +879,7 @@ function abrirModalProduto(produtoId) {
   estado.produtoAtual = produto;
   estado.variacaoSelecionada = produto.variacoes[0];
   estado.quantidadeSelecionada = 1;
+  estado.bordaSelecionada = null;
 
   document.getElementById('modalProdutoEmoji').textContent = produto.emoji;
   document.getElementById('modalProdutoTitulo').textContent = produto.nome;
@@ -771,6 +916,40 @@ function abrirModalProduto(produtoId) {
     });
   });
 
+  // Escolha da borda: aparece só nas pizzas de verdade (ver
+  // precisaDeSelecaoDeBorda). "Sem borda" já vem marcado por padrão,
+  // então o cliente não é obrigado a escolher nada se não quiser.
+  const secaoBorda = document.getElementById('secaoBorda');
+  const listaBordas = document.getElementById('listaBordas');
+  const exibirBorda = precisaDeSelecaoDeBorda(produto.categoriaId);
+  secaoBorda.classList.toggle('oculto', !exibirBorda);
+ 
+  if (exibirBorda) {
+    const opcoesBorda = [{ id: 'nenhuma', nome: 'Sem borda', preco: 0 }, ...obterOpcoesDeBorda()];
+    estado.bordaSelecionada = opcoesBorda[0];
+ 
+    listaBordas.innerHTML = opcoesBorda.map((opcao, indice) => `
+      <li class="opcao-variacao">
+        <label class="opcao-variacao__rotulo">
+          <span class="opcao-variacao__linha-esquerda">
+            <input type="radio" name="bordaProduto" value="${opcao.id}" ${indice === 0 ? 'checked' : ''}>
+            <span class="opcao-variacao__nome">${opcao.nome}</span>
+          </span>
+          <span class="opcao-variacao__preco">${opcao.preco > 0 ? '+ ' + formatarMoeda(opcao.preco) : 'Grátis'}</span>
+        </label>
+      </li>
+    `).join('');
+ 
+    listaBordas.querySelectorAll('input[name="bordaProduto"]').forEach((input) => {
+      input.addEventListener('change', () => {
+        estado.bordaSelecionada = opcoesBorda.find((o) => o.id === input.value);
+        atualizarPrecoTotalModal();
+      });
+    });
+  } else {
+    listaBordas.innerHTML = '';
+  }
+
   atualizarPrecoTotalModal();
   abrirPainel('modalProduto');
 }
@@ -780,10 +959,11 @@ function fecharModalProdutoFn() {
 }
 
 function atualizarPrecoTotalModal() {
-  const total = estado.variacaoSelecionada.preco * estado.quantidadeSelecionada;
+  const precoBorda = estado.bordaSelecionada ? estado.bordaSelecionada.preco : 0;
+  const total = (estado.variacaoSelecionada.preco + precoBorda) * estado.quantidadeSelecionada;
   document.getElementById('precoTotalModal').textContent = formatarMoeda(total);
 }
-
+ 
 function configurarControlesQuantidadeModal() {
   document.getElementById('aumentarQuantidade').addEventListener('click', () => {
     estado.quantidadeSelecionada = Math.min(estado.quantidadeSelecionada + 1, 20);
@@ -796,23 +976,34 @@ function configurarControlesQuantidadeModal() {
     atualizarPrecoTotalModal();
   });
 }
-
+ 
 function configurarFormularioProduto() {
   document.getElementById('formModalProduto').addEventListener('submit', (evento) => {
     evento.preventDefault();
     const observacao = document.getElementById('observacaoProduto').value.trim();
-
+ 
+    // Se o cliente escolheu uma borda (diferente de "Sem borda"), o
+    // nome dela entra junto no nome da variação e o preço dela é somado
+    // ao preço unitário — assim reaproveitamos, sem precisar mudar, toda
+    // a lógica existente do carrinho, do resumo do checkout e da
+    // mensagem do WhatsApp (que já sabem exibir "nome" e "variacaoNome").
+    const precoBorda = estado.bordaSelecionada ? estado.bordaSelecionada.preco : 0;
+    let variacaoNomeCompleta = estado.variacaoSelecionada.nome;
+    if (estado.bordaSelecionada && estado.bordaSelecionada.id !== 'nenhuma') {
+      variacaoNomeCompleta += ` + ${estado.bordaSelecionada.nome}`;
+    }
+ 
     estado.carrinho.push({
       idItemCarrinho: gerarIdUnico(),
       produtoId: estado.produtoAtual.id,
       nome: estado.produtoAtual.nome,
       emoji: estado.produtoAtual.emoji,
-      variacaoNome: estado.variacaoSelecionada.nome,
-      precoUnitario: estado.variacaoSelecionada.preco,
+      variacaoNome: variacaoNomeCompleta,
+      precoUnitario: estado.variacaoSelecionada.preco + precoBorda,
       quantidade: estado.quantidadeSelecionada,
       observacao,
     });
-
+ 
     salvarCarrinhoLocalStorage();
     renderizarCarrinho();
     atualizarIndicadoresCarrinho();
@@ -822,22 +1013,253 @@ function configurarFormularioProduto() {
 }
 
 /* =========================================================================
+   9-B. MODAL "MONTE SUA PIZZA"
+   ========================================================================= */
+function abrirModalMontarPizza() {
+  estadoMontagem.tamanho = 'grande';
+  estadoMontagem.maxSabores = 2;
+  estadoMontagem.saboresSelecionados = [];
+  estadoMontagem.quantidade = 1;
+
+  const radioGrande = document.querySelector('#formMontarPizza input[name="tamanhoMontagem"][value="grande"]');
+  if (radioGrande) radioGrande.checked = true;
+  document.getElementById('valorQuantidadeMontagem').textContent = '1';
+  document.getElementById('observacaoMontagem').value = '';
+
+  renderizarSaboresMontagem();
+  renderizarBordasMontagem();
+  atualizarPrecoTotalMontagem();
+
+  abrirPainel('modalMontarPizza');
+}
+
+function fecharModalMontarPizzaFn() {
+  fecharPainel('modalMontarPizza');
+}
+
+/* Desenha a lista de sabores disponíveis (checkboxes) para o tamanho
+   atual, mostrando o preço de cada sabor NESSE tamanho — o preço final
+   da pizza é sempre o do sabor mais caro escolhido (ver
+   calcularPrecoBaseMontagem), prática padrão de pizzaria para
+   pizzas com mais de um sabor. */
+function renderizarSaboresMontagem() {
+  const sabores = obterSaboresParaMontagem();
+  const lista = document.getElementById('listaSaboresMontagem');
+
+  lista.innerHTML = sabores.map((sabor) => {
+    const variacao = sabor.variacoes.find((v) => v.id === estadoMontagem.tamanho);
+    const preco = variacao ? variacao.preco : 0;
+    return `
+      <li class="opcao-variacao">
+        <label class="opcao-variacao__rotulo">
+          <span class="opcao-variacao__linha-esquerda">
+            <input type="checkbox" name="saborMontagem" value="${sabor.id}">
+            <span class="opcao-variacao__nome">${sabor.nome}</span>
+          </span>
+          <span class="opcao-variacao__preco">${formatarMoeda(preco)}</span>
+        </label>
+      </li>
+    `;
+  }).join('');
+
+  lista.querySelectorAll('input[name="saborMontagem"]').forEach((input) => {
+    input.addEventListener('change', () => alternarSaborMontagem(input));
+  });
+
+  atualizarContadorSabores();
+  atualizarLimitesSabores();
+}
+
+function alternarSaborMontagem(input) {
+  const sabor = buscarProdutoPorId(input.value);
+
+  if (input.checked) {
+    // Segurança extra: os checkboxes já ficam desabilitados ao atingir
+    // o limite (ver atualizarLimitesSabores), mas isso evita ultrapassar
+    // o limite em qualquer cenário.
+    if (estadoMontagem.saboresSelecionados.length >= estadoMontagem.maxSabores) {
+      input.checked = false;
+      return;
+    }
+    estadoMontagem.saboresSelecionados.push(sabor);
+  } else {
+    estadoMontagem.saboresSelecionados = estadoMontagem.saboresSelecionados.filter((s) => s.id !== sabor.id);
+  }
+
+  atualizarContadorSabores();
+  atualizarLimitesSabores();
+  atualizarPrecoTotalMontagem();
+}
+
+function atualizarContadorSabores() {
+  const contador = document.getElementById('contadorSaboresMontagem');
+  if (contador) {
+    contador.textContent = `(${estadoMontagem.saboresSelecionados.length}/${estadoMontagem.maxSabores} selecionados)`;
+  }
+}
+
+/* Desabilita os sabores ainda não marcados assim que o limite do
+   tamanho escolhido é atingido, e liga/desliga o botão de adicionar
+   (precisa de pelo menos 1 sabor escolhido). */
+function atualizarLimitesSabores() {
+  const atingiuLimite = estadoMontagem.saboresSelecionados.length >= estadoMontagem.maxSabores;
+  document.querySelectorAll('#listaSaboresMontagem input[name="saborMontagem"]').forEach((input) => {
+    if (!input.checked) input.disabled = atingiuLimite;
+  });
+
+  const botaoAdicionar = document.getElementById('botaoAdicionarMontagem');
+  if (botaoAdicionar) botaoAdicionar.disabled = estadoMontagem.saboresSelecionados.length === 0;
+}
+
+function renderizarBordasMontagem() {
+  const opcoes = [{ id: 'nenhuma', nome: 'Sem borda', preco: 0 }, ...obterOpcoesDeBorda()];
+  const lista = document.getElementById('listaBordasMontagem');
+
+  lista.innerHTML = opcoes.map((opcao, indice) => `
+    <li class="opcao-variacao">
+      <label class="opcao-variacao__rotulo">
+        <span class="opcao-variacao__linha-esquerda">
+          <input type="radio" name="bordaMontagem" value="${opcao.id}" ${indice === 0 ? 'checked' : ''}>
+          <span class="opcao-variacao__nome">${opcao.nome}</span>
+        </span>
+        <span class="opcao-variacao__preco">${opcao.preco > 0 ? '+ ' + formatarMoeda(opcao.preco) : 'Grátis'}</span>
+      </label>
+    </li>
+  `).join('');
+  estadoMontagem.bordaSelecionada = opcoes[0];
+
+  lista.querySelectorAll('input[name="bordaMontagem"]').forEach((input) => {
+    input.addEventListener('change', () => {
+      estadoMontagem.bordaSelecionada = opcoes.find((o) => o.id === input.value);
+      atualizarPrecoTotalMontagem();
+    });
+  });
+}
+
+/* Troca entre Grande (até 2 sabores) e Gigante (até 4 sabores). Se o
+   cliente já tinha escolhido mais sabores do que o novo limite permite
+   (ex: tinha 4 no Gigante e voltou pra Grande), os sabores excedentes
+   são removidos automaticamente — mantemos sempre os primeiros
+   escolhidos. */
+function configurarTamanhoMontagem() {
+  document.querySelectorAll('#formMontarPizza input[name="tamanhoMontagem"]').forEach((input) => {
+    input.addEventListener('change', () => {
+      estadoMontagem.tamanho = input.value;
+      estadoMontagem.maxSabores = input.value === 'gigante' ? 4 : 2;
+
+      if (estadoMontagem.saboresSelecionados.length > estadoMontagem.maxSabores) {
+        estadoMontagem.saboresSelecionados = estadoMontagem.saboresSelecionados.slice(0, estadoMontagem.maxSabores);
+      }
+
+      renderizarSaboresMontagem();
+
+      const idsSelecionados = estadoMontagem.saboresSelecionados.map((s) => s.id);
+      document.querySelectorAll('#listaSaboresMontagem input[name="saborMontagem"]').forEach((checkbox) => {
+        checkbox.checked = idsSelecionados.includes(checkbox.value);
+      });
+
+      atualizarContadorSabores();
+      atualizarLimitesSabores();
+      atualizarPrecoTotalMontagem();
+    });
+  });
+}
+
+/* O preço-base da pizza montada é o preço do sabor MAIS CARO entre os
+   escolhidos (no tamanho selecionado) — é assim que se cobra uma pizza
+   meio a meio (ou em mais partes) em praticamente toda pizzaria: o
+   cliente paga pelo sabor mais caro, não pela soma de todos. */
+function calcularPrecoBaseMontagem() {
+  if (estadoMontagem.saboresSelecionados.length === 0) return 0;
+
+  const precos = estadoMontagem.saboresSelecionados.map((sabor) => {
+    const variacao = sabor.variacoes.find((v) => v.id === estadoMontagem.tamanho);
+    return variacao ? variacao.preco : 0;
+  });
+
+  return Math.max(...precos);
+}
+
+function atualizarPrecoTotalMontagem() {
+  const precoBase = calcularPrecoBaseMontagem();
+  const precoBorda = estadoMontagem.bordaSelecionada ? estadoMontagem.bordaSelecionada.preco : 0;
+  const total = (precoBase + precoBorda) * estadoMontagem.quantidade;
+  document.getElementById('precoTotalMontagem').textContent = formatarMoeda(total);
+}
+
+function configurarControlesQuantidadeMontagem() {
+  document.getElementById('aumentarQuantidadeMontagem').addEventListener('click', () => {
+    estadoMontagem.quantidade = Math.min(estadoMontagem.quantidade + 1, 20);
+    document.getElementById('valorQuantidadeMontagem').textContent = estadoMontagem.quantidade;
+    atualizarPrecoTotalMontagem();
+  });
+  document.getElementById('diminuirQuantidadeMontagem').addEventListener('click', () => {
+    estadoMontagem.quantidade = Math.max(estadoMontagem.quantidade - 1, 1);
+    document.getElementById('valorQuantidadeMontagem').textContent = estadoMontagem.quantidade;
+    atualizarPrecoTotalMontagem();
+  });
+}
+
+/* Ao adicionar ao carrinho, montamos um "nome de variação" descritivo
+   (tamanho + sabores + borda) e reaproveitamos, sem alterar nada, toda
+   a lógica existente do carrinho / checkout / mensagem de WhatsApp —
+   que já sabe exibir "nome" + "variacaoNome" + "precoUnitario". */
+function configurarFormularioMontagem() {
+  document.getElementById('formMontarPizza').addEventListener('submit', (evento) => {
+    evento.preventDefault();
+
+    if (estadoMontagem.saboresSelecionados.length === 0) {
+      mostrarToast('Escolha pelo menos 1 sabor.', 'erro');
+      return;
+    }
+
+    const observacao = document.getElementById('observacaoMontagem').value.trim();
+    const precoBase = calcularPrecoBaseMontagem();
+    const precoBorda = estadoMontagem.bordaSelecionada ? estadoMontagem.bordaSelecionada.preco : 0;
+    const nomeTamanho = estadoMontagem.tamanho === 'gigante' ? 'Gigante · 8 fatias' : 'Grande · 6 fatias';
+    const nomesSabores = estadoMontagem.saboresSelecionados.map((s) => s.nome).join(' + ');
+
+    let variacaoNomeCompleta = `${nomeTamanho} · Sabores: ${nomesSabores}`;
+    if (estadoMontagem.bordaSelecionada && estadoMontagem.bordaSelecionada.id !== 'nenhuma') {
+      variacaoNomeCompleta += ` + ${estadoMontagem.bordaSelecionada.nome}`;
+    }
+
+    estado.carrinho.push({
+      idItemCarrinho: gerarIdUnico(),
+      produtoId: 'monte-sua-pizza',
+      nome: 'Monte sua Pizza',
+      emoji: '🍕',
+      variacaoNome: variacaoNomeCompleta,
+      precoUnitario: precoBase + precoBorda,
+      quantidade: estadoMontagem.quantidade,
+      observacao,
+    });
+
+    salvarCarrinhoLocalStorage();
+    renderizarCarrinho();
+    atualizarIndicadoresCarrinho();
+    fecharModalMontarPizzaFn();
+    mostrarToast('Sua pizza personalizada foi adicionada ao carrinho! 🍕', 'sucesso');
+  });
+}
+ 
+/* =========================================================================
    10. CARRINHO
    ========================================================================= */
 function calcularSubtotalCarrinho() {
   return estado.carrinho.reduce((soma, item) => soma + item.precoUnitario * item.quantidade, 0);
 }
-
+ 
 function atualizarIndicadoresCarrinho() {
   const quantidadeTotal = estado.carrinho.reduce((soma, item) => soma + item.quantidade, 0);
   const subtotal = calcularSubtotalCarrinho();
-
+ 
   document.getElementById('contadorCarrinho').textContent = quantidadeTotal;
   document.getElementById('totalCarrinhoFlutuante').textContent = formatarMoeda(subtotal);
   // O botão fica sempre visível (mesmo com o carrinho vazio) para que o
   // cliente sempre tenha acesso rápido a ele.
 }
-
+ 
 function renderizarItemCarrinho(item) {
   return `
     <li class="item-carrinho" data-item-id="${item.idItemCarrinho}">
@@ -859,48 +1281,48 @@ function renderizarItemCarrinho(item) {
     </li>
   `;
 }
-
+ 
 function renderizarCarrinho() {
   const lista = document.getElementById('listaItensCarrinho');
   const vazio = document.getElementById('carrinhoVazio');
   const rodape = document.getElementById('rodapeCarrinho');
-
+ 
   if (estado.carrinho.length === 0) {
     lista.innerHTML = '';
     vazio.classList.remove('oculto');
     rodape.classList.add('oculto');
     return;
   }
-
+ 
   vazio.classList.add('oculto');
   rodape.classList.remove('oculto');
   lista.innerHTML = estado.carrinho.map(renderizarItemCarrinho).join('');
-
+ 
   lista.querySelectorAll('.item-carrinho').forEach((elementoItem) => {
     const idItem = elementoItem.dataset.itemId;
-
+ 
     elementoItem.querySelector('[data-acao="aumentar"]').addEventListener('click', () => alterarQuantidadeItem(idItem, 1));
     elementoItem.querySelector('[data-acao="diminuir"]').addEventListener('click', () => alterarQuantidadeItem(idItem, -1));
     elementoItem.querySelector('[data-acao="remover"]').addEventListener('click', () => removerItemCarrinho(idItem));
   });
-
+ 
   document.getElementById('subtotalCarrinho').textContent = formatarMoeda(calcularSubtotalCarrinho());
 }
-
+ 
 function alterarQuantidadeItem(idItem, delta) {
   const item = estado.carrinho.find((i) => i.idItemCarrinho === idItem);
   if (!item) return;
-
+ 
   item.quantidade += delta;
   if (item.quantidade <= 0) {
     estado.carrinho = estado.carrinho.filter((i) => i.idItemCarrinho !== idItem);
   }
-
+ 
   salvarCarrinhoLocalStorage();
   renderizarCarrinho();
   atualizarIndicadoresCarrinho();
 }
-
+ 
 function removerItemCarrinho(idItem) {
   estado.carrinho = estado.carrinho.filter((i) => i.idItemCarrinho !== idItem);
   salvarCarrinhoLocalStorage();
@@ -908,7 +1330,7 @@ function removerItemCarrinho(idItem) {
   atualizarIndicadoresCarrinho();
   mostrarToast('Item removido do carrinho.');
 }
-
+ 
 function salvarCarrinhoLocalStorage() {
   try {
     localStorage.setItem('lagoinhaCarrinho', JSON.stringify(estado.carrinho));
@@ -916,7 +1338,7 @@ function salvarCarrinhoLocalStorage() {
     console.warn('Não foi possível salvar o carrinho localmente:', erro);
   }
 }
-
+ 
 function carregarCarrinhoLocalStorage() {
   try {
     const dados = localStorage.getItem('lagoinhaCarrinho');
@@ -926,7 +1348,7 @@ function carregarCarrinhoLocalStorage() {
     estado.carrinho = [];
   }
 }
-
+ 
 /* =========================================================================
    11. ABRIR/FECHAR PAINÉIS (carrinho e checkout)
    ========================================================================= */
@@ -936,34 +1358,34 @@ function abrirCarrinho() {
   // renderizarCarrinho()) em vez de recusar abrir.
   abrirPainel('painelCarrinho');
 }
-
+ 
 function fecharCarrinhoFn() {
   fecharPainel('painelCarrinho');
 }
-
+ 
 function abrirCheckout() {
   fecharCarrinhoFn();
   ocultarLinkManualWhatsApp();
   atualizarResumoCheckout();
   abrirPainel('painelCheckout');
 }
-
+ 
 function fecharCheckoutFn() {
   ocultarLinkManualWhatsApp();
   fecharPainel('painelCheckout');
 }
-
+ 
 /* =========================================================================
    12. CHECKOUT — ENDEREÇO, PAGAMENTO E RESUMO
    ========================================================================= */
 function obterTipoEntregaSelecionado() {
   return document.querySelector('#formCheckout input[name="tipoEntrega"]:checked').value;
 }
-
+ 
 function obterFormaPagamentoSelecionada() {
   return document.querySelector('#formCheckout input[name="formaPagamento"]:checked').value;
 }
-
+ 
 /* Mostra/esconde o bloco de endereço e sincroniza os campos obrigatórios
    com o tipo de entrega selecionado. Além de esconder o <fieldset> de
    endereço, também o desabilita (fieldset.disabled = true) quando não
@@ -973,15 +1395,15 @@ function obterFormaPagamentoSelecionada() {
 function sincronizarCamposDeEntrega() {
   const ehEntrega = obterTipoEntregaSelecionado() === 'entrega';
   const fieldsetEndereco = document.getElementById('camposEndereco');
-
+ 
   fieldsetEndereco.classList.toggle('oculto', !ehEntrega);
   fieldsetEndereco.disabled = !ehEntrega;
-
+ 
   ['ruaEndereco', 'numeroEndereco', 'bairroEndereco'].forEach((idCampo) => {
     document.getElementById(idCampo).required = ehEntrega;
   });
 }
-
+ 
 function configurarAlternanciaEntrega() {
   sincronizarCamposDeEntrega();
   document.querySelectorAll('input[name="tipoEntrega"]').forEach((input) => {
@@ -991,7 +1413,7 @@ function configurarAlternanciaEntrega() {
     });
   });
 }
-
+ 
 function configurarAlternanciaPagamento() {
   document.querySelectorAll('input[name="formaPagamento"]').forEach((input) => {
     input.addEventListener('change', () => {
@@ -1001,7 +1423,7 @@ function configurarAlternanciaPagamento() {
     });
   });
 }
-
+ 
 function atualizarResumoCheckout() {
   const resumo = document.getElementById('resumoPedido');
   resumo.innerHTML = estado.carrinho.map((item) => `
@@ -1010,16 +1432,16 @@ function atualizarResumoCheckout() {
       <span class="resumo-pedido__preco">${formatarMoeda(item.precoUnitario * item.quantidade)}</span>
     </li>
   `).join('');
-
+ 
   const subtotal = calcularSubtotalCarrinho();
   const ehEntrega = obterTipoEntregaSelecionado() === 'entrega';
   const taxaEntrega = ehEntrega ? CONFIGURACAO.taxaEntrega : 0;
   const total = subtotal + taxaEntrega;
-
+ 
   document.getElementById('resumoSubtotal').textContent = formatarMoeda(subtotal);
   document.getElementById('resumoTaxaEntrega').textContent = formatarMoeda(taxaEntrega);
   document.getElementById('resumoTotal').textContent = formatarMoeda(total);
-
+ 
   // A linha "Taxa de entrega" é um par <dt>/<dd> dentro do <dl>: para
   // escondê-la sem quebrar o alinhamento do grid, escondemos os dois
   // elementos individualmente (o CSS Grid ignora itens com display:none
@@ -1027,7 +1449,7 @@ function atualizarResumoCheckout() {
   document.getElementById('rotuloTaxaEntrega').classList.toggle('oculto', !ehEntrega);
   document.getElementById('resumoTaxaEntrega').classList.toggle('oculto', !ehEntrega);
 }
-
+ 
 /* =========================================================================
    13. VALIDAÇÃO E ENVIO DO PEDIDO
    ========================================================================= */
@@ -1054,7 +1476,7 @@ function validarFormularioCheckout(dados) {
     const valorTroco = converterTextoParaNumero(dados.trocoPara);
     const ehEntrega = dados.tipoEntrega === 'entrega';
     const totalPedido = calcularSubtotalCarrinho() + (ehEntrega ? CONFIGURACAO.taxaEntrega : 0);
-
+ 
     if (valorTroco === null) {
       mostrarToast('Informe um valor de troco válido, ex: 100,00.', 'erro');
       return false;
@@ -1066,19 +1488,19 @@ function validarFormularioCheckout(dados) {
   }
   return true;
 }
-
+ 
 function montarMensagemWhatsApp(dados) {
   const subtotal = calcularSubtotalCarrinho();
   const ehEntrega = dados.tipoEntrega === 'entrega';
   const taxaEntrega = ehEntrega ? CONFIGURACAO.taxaEntrega : 0;
   const total = subtotal + taxaEntrega;
-
+ 
   const linhasItens = estado.carrinho.map((item) => {
     let linha = `• ${item.quantidade}x ${item.nome} (${item.variacaoNome}) — ${formatarMoeda(item.precoUnitario * item.quantidade)}`;
     if (item.observacao) linha += `\n   _Obs: ${item.observacao}_`;
     return linha;
   }).join('\n');
-
+ 
   let blocoEntrega = '';
   if (ehEntrega) {
     blocoEntrega = `*Entrega:* 🛵 Delivery\n${dados.ruaEndereco}, ${dados.numeroEndereco} — ${dados.bairroEndereco}`;
@@ -1087,7 +1509,7 @@ function montarMensagemWhatsApp(dados) {
   } else {
     blocoEntrega = '*Entrega:* 🏠 Retirada no local';
   }
-
+ 
   let blocoPagamento = '*Pagamento:* ';
   if (dados.formaPagamento === 'dinheiro') {
     blocoPagamento += '💵 Dinheiro';
@@ -1097,7 +1519,7 @@ function montarMensagemWhatsApp(dados) {
   } else {
     blocoPagamento += '📱 Pix';
   }
-
+ 
   const partes = [
     `*NOVO PEDIDO — ${CONFIGURACAO.nomeLoja.toUpperCase()}* 🍕`,
     `*Cliente:* ${dados.nomeCliente}`,
@@ -1108,19 +1530,19 @@ function montarMensagemWhatsApp(dados) {
     '',
     `*Subtotal:* ${formatarMoeda(subtotal)}`,
   ];
-
+ 
   if (ehEntrega) partes.push(`*Taxa de entrega:* ${formatarMoeda(taxaEntrega)}`);
   partes.push(`*Total:* ${formatarMoeda(total)}`, '', blocoEntrega, '', blocoPagamento);
-
+ 
   if (dados.observacoesGerais) {
     partes.push('', `*Observações gerais:* ${dados.observacoesGerais}`);
   }
-
+ 
   partes.push('', '_Pedido enviado pelo cardápio digital._');
-
+ 
   return partes.join('\n');
 }
-
+ 
 /* Abre o WhatsApp criando e "clicando" num link real (<a target="_blank">)
    em vez de usar window.open(). Isso evita a maioria dos bloqueios de
    pop-up dos navegadores, que costumam mirar especificamente chamadas de
@@ -1142,7 +1564,7 @@ function abrirWhatsApp(url) {
     return false;
   }
 }
-
+ 
 /* Mostra um botão de apoio, sempre visível após o envio, com o link
    pronto do pedido. Garante que o cliente NUNCA fique sem conseguir
    enviar o pedido, mesmo se a abertura automática for bloqueada pelo
@@ -1154,17 +1576,17 @@ function exibirLinkManualWhatsApp(url) {
   link.href = url;
   link.classList.remove('oculto');
 }
-
+ 
 function ocultarLinkManualWhatsApp() {
   const link = document.getElementById('linkManualWhatsapp');
   link.classList.add('oculto');
   link.href = '#';
 }
-
+ 
 function configurarEnvioFormularioCheckout() {
   document.getElementById('formCheckout').addEventListener('submit', (evento) => {
     evento.preventDefault();
-
+ 
     const formulario = evento.target;
     const dados = {
       nomeCliente: document.getElementById('nomeCliente').value.trim(),
@@ -1179,26 +1601,26 @@ function configurarEnvioFormularioCheckout() {
       trocoPara: document.getElementById('trocoPara').value.trim(),
       observacoesGerais: document.getElementById('observacoesGerais').value.trim(),
     };
-
+ 
     if (!validarFormularioCheckout(dados)) return;
-
+ 
     const mensagem = montarMensagemWhatsApp(dados);
     const url = `https://wa.me/${CONFIGURACAO.numeroWhatsapp}?text=${encodeURIComponent(mensagem)}`;
-
+ 
     const abriuAutomaticamente = abrirWhatsApp(url);
-
+ 
     // O link manual fica sempre visível após o envio — mesmo quando a
     // abertura automática funciona — como uma rede de segurança caso o
     // cliente feche a aba do WhatsApp sem enviar por engano.
     exibirLinkManualWhatsApp(url);
-
+ 
     mostrarToast(
       abriuAutomaticamente
         ? 'Pedido pronto! Confirme o envio na aba do WhatsApp que abrimos. 🍕✅'
         : 'Pedido pronto! Toque no botão dourado abaixo para enviar pelo WhatsApp. 🍕✅',
       'sucesso'
     );
-
+ 
     // É seguro limpar o carrinho agora: a mensagem completa do pedido já
     // está guardada na URL do link manual, então o cliente não perde nada
     // mesmo se a abertura automática tiver falhado.
@@ -1206,12 +1628,12 @@ function configurarEnvioFormularioCheckout() {
     salvarCarrinhoLocalStorage();
     renderizarCarrinho();
     atualizarIndicadoresCarrinho();
-
+ 
     formulario.reset();
     sincronizarCamposDeEntrega();
     document.getElementById('campoTroco').classList.remove('oculto');
     document.getElementById('avisoPix').classList.add('oculto');
-
+ 
     // Importante: NÃO fechamos o painel de checkout automaticamente aqui.
     // Se fechássemos, o botão de apoio (linkManualWhatsapp) ficaria
     // escondido junto com o painel, e o cliente perderia a única forma de
@@ -1220,7 +1642,7 @@ function configurarEnvioFormularioCheckout() {
     // envio no WhatsApp.
   });
 }
-
+ 
 /* =========================================================================
    14. EVENTOS GERAIS DE INTERFACE
    ========================================================================= */
@@ -1228,6 +1650,7 @@ function configurarEventosGerais() {
   document.getElementById('botaoCarrinhoFlutuante').addEventListener('click', abrirCarrinho);
   document.getElementById('fecharCarrinho').addEventListener('click', fecharCarrinhoFn);
   document.getElementById('fecharModalProduto').addEventListener('click', fecharModalProdutoFn);
+  document.getElementById('fecharModalMontarPizza').addEventListener('click', fecharModalMontarPizzaFn);
   document.getElementById('botaoIrParaCheckout').addEventListener('click', abrirCheckout);
   document.getElementById('fecharCheckout').addEventListener('click', fecharCheckoutFn);
   document.getElementById('voltarParaCarrinho').addEventListener('click', () => {
@@ -1235,7 +1658,7 @@ function configurarEventosGerais() {
     abrirCarrinho();
   });
 }
-
+ 
 /* =========================================================================
    15. INICIALIZAÇÃO
    ========================================================================= */
@@ -1245,7 +1668,7 @@ function inicializarAplicacao() {
   renderizarCardapio();
   ajustarMargemDeRolagem();
   window.addEventListener('resize', ajustarMargemDeRolagem);
-
+ 
   // observarCategoriasVisiveis() é só um realce visual (destaca a
   // categoria atual na navegação enquanto o cliente rola a página).
   // Isolamos com try/catch de propósito: se IntersectionObserver não
@@ -1257,11 +1680,14 @@ function inicializarAplicacao() {
   } catch (erro) {
     console.warn('Realce de categoria ativa desativado (navegador sem suporte?):', erro);
   }
-
+ 
   configurarBusca();
   configurarComportamentoDosPaineis();
   configurarControlesQuantidadeModal();
   configurarFormularioProduto();
+  configurarTamanhoMontagem();
+  configurarControlesQuantidadeMontagem();
+  configurarFormularioMontagem();
   configurarAlternanciaEntrega();
   configurarAlternanciaPagamento();
   configurarEnvioFormularioCheckout();
@@ -1270,5 +1696,5 @@ function inicializarAplicacao() {
   renderizarCarrinho();
   atualizarIndicadoresCarrinho();
 }
-
+ 
 document.addEventListener('DOMContentLoaded', inicializarAplicacao);

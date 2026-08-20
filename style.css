@@ -1,5 +1,5 @@
 /* =========================================================================
-   PIZZARIA NONNA BELLA — STYLE.CSS
+   PIZZARIA N — STYLE.CSS
    Identidade visual: vermelho (tomate/fogo) + amarelo (queijo/dourado).
    Este arquivo cuida de: variáveis de design, reset, tipografia,
    cores, sombras, animações e a "pele" (skin) dos componentes.
@@ -470,6 +470,16 @@ h1, h2, h3 {
 .botao--bloco {
   width: 100%;
 }
+
+/* Estado desabilitado (usado no "Monte sua Pizza", enquanto nenhum
+   sabor foi escolhido ainda) — sem isso o botão ficava com a aparência
+   de clicável mesmo estando desabilitado. */
+.botao:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* -------------------- 8. BOTÃO FLUTUANTE CARRINHO -------------------- */
 .botao-carrinho-flutuante {
   position: fixed;
@@ -612,6 +622,15 @@ h1, h2, h3 {
   display: block;
 }
 
+/* Texto do contador "(0/2 selecionados)" ao lado do rótulo, usado no
+   "Monte sua Pizza" — mais leve/discreto que o rótulo em si. */
+.modal-produto__contador {
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: normal;
+  color: var(--cor-texto-suave);
+}
+
 .lista-variacoes {
   display: flex;
   flex-direction: column;
@@ -630,6 +649,12 @@ h1, h2, h3 {
 .opcao-variacao__rotulo:has(input:checked) {
   border-color: var(--cor-vermelho);
   background: rgba(214, 40, 57, 0.06);
+}
+/* Opções desabilitadas (usado no "Monte sua Pizza" quando o limite de
+   sabores do tamanho escolhido já foi atingido). */
+.opcao-variacao__rotulo:has(input:disabled) {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 .opcao-variacao__linha-esquerda {
   display: flex;

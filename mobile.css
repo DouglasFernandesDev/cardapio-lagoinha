@@ -39,9 +39,62 @@
   padding-bottom: 0.9rem;
 }
 
+/* Em telas de celular/tablet a barra de categorias vira um menu
+   suspenso acionado pelo botão hambúrguer — evita ter que arrastar uma
+   fila comprida de categorias para o lado (já são 8 categorias). No
+   desktop (ver @media min-width:900px mais abaixo) isso volta a ser a
+   faixa horizontal de sempre, que já tem espaço de sobra. */
+.navegacao-categorias {
+  position: relative;
+}
+.navegacao-categorias__hamburguer {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.navegacao-categorias__hamburguer-icone {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.navegacao-categorias__hamburguer-linha {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+}
 .navegacao-categorias__lista {
-  gap: 0.2rem;
-  padding-inline: 0.5rem;
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  gap: 0;
+  padding-inline: 0;
+  max-height: 70vh;
+  overflow-x: visible;
+  overflow-y: auto;
+  background: inherit;
+  border-top: 1px solid var(--cor-escura-borda);
+  box-shadow: var(--sombra-media);
+}
+.navegacao-categorias__lista--aberta {
+  display: flex;
+}
+.navegacao-categorias__botao {
+  width: 100%;
+  text-align: left;
 }
 
 /* -------------------- CONTEÚDO / GRID DE PRODUTOS -------------------- */
@@ -329,11 +382,24 @@
     margin-inline-start: auto;
   }
 
+  .navegacao-categorias__hamburguer {
+    display: none;
+  }
   .navegacao-categorias__lista {
+    display: flex;
+    position: static;
+    flex-direction: row;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: visible;
+    border-top: none;
+    box-shadow: none;
     padding-inline: 1.5rem;
     justify-content: flex-start;
   }
   .navegacao-categorias__botao {
+    width: auto;
+    text-align: center;
     padding: 1.05rem 1.3rem;
   }
 
