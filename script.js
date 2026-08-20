@@ -5,13 +5,31 @@
 
 'use strict';
 
+/* =========================================================================
+   1. CONFIGURAÇÃO DA LOJA — troque pelos dados reais da pizzaria
+   ========================================================================= */
 const CONFIGURACAO = {
- 
+  // Número do WhatsApp com código do país + DDD, somente dígitos.
+  // Exemplo: 55 (Brasil) + 21 (DDD) + número.
   numeroWhatsapp: '5522998328849',
   nomeLoja: 'Pizzaria Lagoinha',
   taxaEntrega: 6.0,
-  horarioFuncionamento: { abre: 18, fecha: 23.5 }, // 23.5 = 23h30
   chavePix: 'contato@nonnabella.com.br',
+};
+
+/* Horário de funcionamento por dia da semana. O índice de cada dia
+   segue o mesmo padrão do JavaScript (Date.getDay()): 0 = domingo,
+   1 = segunda-feira, 2 = terça-feira ... 6 = sábado.
+   Para um dia fechado, use "null" no lugar de { abre, fecha }.
+   Os horários são escritos como "HH:MM" (24 horas). */
+const HORARIO_FUNCIONAMENTO_POR_DIA = {
+  0: { abre: '18:00', fecha: '23:59' }, // domingo
+  1: null,                              // segunda-feira — fechado
+  2: { abre: '18:00', fecha: '23:00' }, // terça-feira
+  3: { abre: '18:00', fecha: '23:00' }, // quarta-feira
+  4: { abre: '18:00', fecha: '23:00' }, // quinta-feira
+  5: { abre: '18:00', fecha: '23:59' }, // sexta-feira
+  6: { abre: '18:00', fecha: '23:59' }, // sábado
 };
 
 /* =========================================================================
@@ -424,7 +442,9 @@ function buscarProdutoPorId(produtoId) {
 }
 
 /* Mostra uma notificação rápida (toast) por 3.2s, usando uma simples
-   troca de classe, um z-index alto é suficiente para
+   troca de classe. Como os painéis e modais voltaram a ser divs
+   controladas por nós (em vez de <dialog> nativo competindo pela
+   camada superior do navegador), um z-index alto é suficiente para
    garantir que o toast sempre apareça por cima de tudo. */
 function mostrarToast(mensagem, tipo = '') {
   const toast = document.getElementById('toast');
@@ -443,11 +463,26 @@ function travarRolagemFundo(travar) {
 /* =========================================================================
    5. STATUS DA LOJA (aberto/fechado)
    ========================================================================= */
+
+/* Converte um horário no formato "HH:MM" para minutos desde a meia-noite
+   (ex: "18:00" -> 1080, "23:59" -> 1439) — mais simples e preciso de
+   comparar do que lidar com horas fracionadas. */
+function converterHorarioParaMinutos(horario) {
+  const [horas, minutos] = horario.split(':').map(Number);
+  return horas * 60 + minutos;
+}
+
 function atualizarStatusLoja() {
   const agora = new Date();
-  const horaAtual = agora.getHours() + agora.getMinutes() / 60;
-  const { abre, fecha } = CONFIGURACAO.horarioFuncionamento;
-  const aberto = horaAtual >= abre && horaAtual < fecha;
+  const horarioDeHoje = HORARIO_FUNCIONAMENTO_POR_DIA[agora.getDay()];
+  const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
+
+  let aberto = false;
+  if (horarioDeHoje) {
+    const minutosAbre = converterHorarioParaMinutos(horarioDeHoje.abre);
+    const minutosFecha = converterHorarioParaMinutos(horarioDeHoje.fecha);
+    aberto = minutosAgora >= minutosAbre && minutosAgora <= minutosFecha;
+  }
 
   const elementoStatus = document.getElementById('statusLoja');
   const textoStatus = document.getElementById('textoStatus');
@@ -474,8 +509,8 @@ function renderizarNavegacaoCategorias() {
 
   // O botão hambúrguer só aparece visualmente em telas de celular/tablet
   // (ver mobile.css) — no desktop ele fica escondido e a lista de
-  // categorias volta a aparecer sempre visível, na horizontal.
-  //  Gerar os dois juntos aqui evita ter que manter duas
+  // categorias volta a aparecer sempre visível, na horizontal, como já
+  // era antes. Gerar os dois juntos aqui evita ter que manter duas
   // versões de HTML/JS diferentes para cada tamanho de tela.
   nav.innerHTML = `
     <button
@@ -613,6 +648,36 @@ function ajustarMargemDeRolagem() {
   document.documentElement.style.setProperty('--altura-nav-categorias', (altura + 16) + 'px');
 }
 
+/* Reforça, via JavaScript, o comportamento de "barra de categorias fixa
+   no topo ao rolar" que o CSS ("position: sticky") já tenta fazer
+   sozinho. Observamos a faixa superior do cabeçalho (logo + busca): no
+   instante em que ela sai completamente da tela por cima (o cliente já
+   rolou além dela), ligamos a classe que muda a barra para
+   "position: fixed" — bem mais simples e previsível do que confiar só
+   no sticky. Compensamos o espaço que a barra deixa de ocupar dentro
+   do cabeçalho (padding-bottom) para o resto da página não "pular"
+   quando isso acontece. */
+function configurarBarraFixaAoRolar() {
+  const faixaSuperior = document.querySelector('.cabecalho__faixa-superior');
+  const nav = document.getElementById('navCategorias');
+  const cabecalho = document.getElementById('cabecalho');
+  if (!faixaSuperior || !nav || !cabecalho) return;
+
+  const observador = new IntersectionObserver(([entrada]) => {
+    const rolouAlemDoTopo = !entrada.isIntersecting && entrada.boundingClientRect.top < 0;
+
+    if (rolouAlemDoTopo) {
+      cabecalho.style.paddingBottom = nav.getBoundingClientRect().height + 'px';
+      nav.classList.add('navegacao-categorias--fixa');
+    } else {
+      cabecalho.style.paddingBottom = '';
+      nav.classList.remove('navegacao-categorias--fixa');
+    }
+  }, { threshold: 0 });
+
+  observador.observe(faixaSuperior);
+}
+
 /* Retorna as opções de borda disponíveis (todas as pizzas cadastradas
    na categoria "bordas"), no formato { id, nome, preco } — os mesmos
    valores já usados quando a borda é vendida como item avulso. */
@@ -672,6 +737,17 @@ function configurarFallbackDeFotos(escopo) {
     img.onerror = () => {
       img.style.display = 'none';
     };
+
+    // Cobre o caso de fotos com "src" já fixo no HTML desde o início
+    // (como a do "Monte sua Pizza"): o navegador pode começar a
+    // carregar essa imagem assim que a página é lida, antes do nosso
+    // JavaScript sequer rodar — se ela já falhou nesse meio-tempo, o
+    // "onerror" acima nunca vai disparar (o erro já aconteceu e ninguém
+    // "escutou"). "img.complete && naturalWidth === 0" identifica esse
+    // caso e escondemos na hora, sem depender do evento.
+    if (img.complete && img.naturalWidth === 0) {
+      img.style.display = 'none';
+    }
   });
 }
 
@@ -1029,6 +1105,7 @@ function abrirModalMontarPizza() {
   renderizarSaboresMontagem();
   renderizarBordasMontagem();
   atualizarPrecoTotalMontagem();
+  configurarFallbackDeFotos(document.getElementById('modalMontarPizza'));
 
   abrirPainel('modalMontarPizza');
 }
@@ -1666,6 +1743,13 @@ function inicializarAplicacao() {
   carregarCarrinhoLocalStorage();
   renderizarNavegacaoCategorias();
   renderizarCardapio();
+
+  // A foto do "Monte sua Pizza" vem fixa no HTML desde o início (ao
+  // contrário das outras, que só ganham "src" quando o modal abre) —
+  // por isso conectamos o fallback dela aqui, o quanto antes possível.
+  const modalMontarPizza = document.getElementById('modalMontarPizza');
+  if (modalMontarPizza) configurarFallbackDeFotos(modalMontarPizza);
+
   ajustarMargemDeRolagem();
   window.addEventListener('resize', ajustarMargemDeRolagem);
  
@@ -1680,7 +1764,16 @@ function inicializarAplicacao() {
   } catch (erro) {
     console.warn('Realce de categoria ativa desativado (navegador sem suporte?):', erro);
   }
- 
+
+  // Mesmo raciocínio aqui: se por algum motivo isso falhar, a barra de
+  // categorias ainda tem o "position: sticky" do CSS como plano B — não
+  // pode travar o resto da inicialização.
+  try {
+    configurarBarraFixaAoRolar();
+  } catch (erro) {
+    console.warn('Reforço de barra fixa desativado (navegador sem suporte?):', erro);
+  }
+
   configurarBusca();
   configurarComportamentoDosPaineis();
   configurarControlesQuantidadeModal();

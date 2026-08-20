@@ -1,5 +1,5 @@
 /* =========================================================================
-   PIZZARIA N — STYLE.CSS
+   PIZZARIA NONNA BELLA — STYLE.CSS
    Identidade visual: vermelho (tomate/fogo) + amarelo (queijo/dourado).
    Este arquivo cuida de: variáveis de design, reset, tipografia,
    cores, sombras, animações e a "pele" (skin) dos componentes.
@@ -290,6 +290,20 @@ h1, h2, h3 {
   top: 0;
   z-index: var(--camada-navegacao);
 }
+/* Reforço via JavaScript (ver configurarBarraFixaAoRolar em script.js):
+   assim que a página rola e o topo do cabeçalho (logo/busca) sai
+   completamente da tela, a barra de categorias passa a usar
+   "position: fixed" — um comportamento mais simples e garantido do que
+   depender só do "position: sticky" acima, que tem ótimo suporte nos
+   navegadores reais mas cujo resultado exato pode variar dependendo do
+   navegador/dispositivo. Com os dois juntos, a barra fica fixa no topo
+   de forma confiável em qualquer situação. */
+.navegacao-categorias--fixa {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
 .navegacao-categorias__lista {
   display: flex;
   overflow-x: auto;
@@ -570,7 +584,12 @@ h1, h2, h3 {
   border: none;
   background: rgba(58, 17, 9, 0.08);
   font-size: 1rem;
-  z-index: 2;
+  /* Precisa ser maior que o z-index da foto (.modal-produto__foto, que
+     usa z-index: 2) — do contrário, assim que uma foto de verdade for
+     adicionada (hoje isso fica escondido porque ainda não existem fotos
+     reais), ela passa a ficar por cima do botão de fechar e o cliente
+     não consegue mais fechar o modal. */
+  z-index: 3;
 }
 .modal-produto__fechar:hover {
   background: rgba(58, 17, 9, 0.16);

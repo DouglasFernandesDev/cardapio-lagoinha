@@ -43,10 +43,16 @@
    suspenso acionado pelo botão hambúrguer — evita ter que arrastar uma
    fila comprida de categorias para o lado (já são 8 categorias). No
    desktop (ver @media min-width:900px mais abaixo) isso volta a ser a
-   faixa horizontal de sempre, que já tem espaço de sobra. */
-.navegacao-categorias {
-  position: relative;
-}
+   faixa horizontal de sempre, que já tem espaço de sobra.
+
+   Importante: NÃO redefinimos "position" aqui. O style.css já deixa
+   ".navegacao-categorias" como "position: sticky" (barra fixa no topo
+   ao rolar a página) — e um elemento sticky já serve perfeitamente
+   como âncora para o menu suspenso abaixo dele (position: absolute),
+   sem precisar de position: relative. Definir position: relative aqui
+   sobrescreveria o sticky do style.css (o mobile.css carrega depois) e
+   a barra pararia de ficar fixa ao rolar — foi exatamente esse o bug
+   que corrigimos aqui. */
 .navegacao-categorias__hamburguer {
   display: flex;
   align-items: center;
