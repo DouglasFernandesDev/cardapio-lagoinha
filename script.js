@@ -23,13 +23,13 @@ const CONFIGURACAO = {
    Para um dia fechado, use "null" no lugar de { abre, fecha }.
    Os horários são escritos como "HH:MM" (24 horas). */
 const HORARIO_FUNCIONAMENTO_POR_DIA = {
-  0: { abre: '18:00', fecha: '23:59' }, // domingo
+  0: { abre: '17:45', fecha: '23:59' }, // domingo
   1: null,                              // segunda-feira — fechado
-  2: { abre: '18:00', fecha: '23:00' }, // terça-feira
-  3: { abre: '18:00', fecha: '23:00' }, // quarta-feira
-  4: { abre: '18:00', fecha: '23:00' }, // quinta-feira
-  5: { abre: '18:00', fecha: '23:59' }, // sexta-feira
-  6: { abre: '18:00', fecha: '23:59' }, // sábado
+  2: { abre: '17:40', fecha: '23:00' }, // terça-feira
+  3: { abre: '17:40', fecha: '23:00' }, // quarta-feira
+  4: { abre: '16:40', fecha: '23:00' }, // quinta-feira
+  5: { abre: '17:40', fecha: '23:59' }, // sexta-feira
+  6: { abre: '17:40', fecha: '23:59' }, // sábado
 };
 
 /* =========================================================================
@@ -60,8 +60,8 @@ const PRODUTOS = [
     nome: 'Mussarela',
     descricao: 'Mussarela e orégano',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 44.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 64.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 44.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 64.99 },
     ],
   },  
   {
@@ -69,8 +69,8 @@ const PRODUTOS = [
     nome: 'Calabresa',
     descricao: 'Mussarela, calabresa e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 44.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 64.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 44.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 64.99 },
     ],
   },
   {
@@ -78,8 +78,8 @@ const PRODUTOS = [
     nome: 'Presunto',
     descricao: 'Mussarela, presuntop e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 44.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 64.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 44.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 64.99 },
     ],
   },
 
@@ -89,8 +89,8 @@ const PRODUTOS = [
     nome: 'Portuguesa',
     descricao: 'Mussarela, presunto, calabresa, tomate, pimentão, cebola, palmito, ovo e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 70.99 },
     ],
   },
   {
@@ -98,8 +98,8 @@ const PRODUTOS = [
     nome: 'Calabresa com cebola',
     descricao: 'Mussarela, calabresa, cebola e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 46.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 66.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 46.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 66.99 },
     ],
   },
   {
@@ -107,8 +107,8 @@ const PRODUTOS = [
     nome: 'Calabresa com Requeijão',
     descricao: 'Mussarela, calabresa, requeijão cremoso e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 69.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 69.99 },
     ],
   },
   {
@@ -116,8 +116,8 @@ const PRODUTOS = [
     nome: 'Frango com Requeijão',
     descricao: 'Mussarela, frango, requeijão cremoso e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 70.99 },
     ],
   },
   {
@@ -125,8 +125,8 @@ const PRODUTOS = [
     nome: 'Mista',
     descricao: 'Mussarela, presunto, calabresa, tomate, pimentão, cebola, palmito, ovo e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 70.99 },
     ],
   },
   {
@@ -134,8 +134,8 @@ const PRODUTOS = [
     nome: 'Alho torrado',
     descricao: 'Mussarela, alho torrado e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 70.99 },
     ],
   },
   {
@@ -143,8 +143,8 @@ const PRODUTOS = [
     nome: 'Peito de Peru',
     descricao: 'Mussarela, peito de peru e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 70.99 },
     ],
   },
   {
@@ -152,8 +152,8 @@ const PRODUTOS = [
     nome: 'Bacon',
     descricao: 'Mussarela, bacon e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 70.99 },
     ],
   },
   {
@@ -161,8 +161,8 @@ const PRODUTOS = [
     nome: 'Bacon com ovos',
     descricao: 'Mussarela, bacon, ovo e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 51.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 72.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 51.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 72.99 },
     ],
   },
 
@@ -172,8 +172,8 @@ const PRODUTOS = [
     nome: 'Camarão com requeijão',
     descricao: 'Mussarela, camarão, requeijão cremoso e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
     ],
   },
   {
@@ -181,8 +181,8 @@ const PRODUTOS = [
     nome: 'Três porquinhos',
     descricao: 'Mussarela, presunto, calabresa, bacon e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
     ],
   },
   {
@@ -190,8 +190,8 @@ const PRODUTOS = [
     nome: 'Quatro queijos',
     descricao: 'Mussarela, parmesão, provolone, requeijão cremoso e oregano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
     ],
   },
   {
@@ -199,8 +199,8 @@ const PRODUTOS = [
     nome: 'Carne seca',
     descricao: 'Mussarela, carne seca, requeijão cremoso, cebola  e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
     ],
   },
   {
@@ -208,8 +208,8 @@ const PRODUTOS = [
     nome: 'Frango com cheddar e bacon',
     descricao: 'Mussarela, frango, bacon, cheddar e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
     ],
   },
   {
@@ -217,8 +217,8 @@ const PRODUTOS = [
     nome: 'Frango caipira',
     descricao: 'Mussarela, frango, milho, requeijão cremoso e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
     ],
   },
 
@@ -228,8 +228,8 @@ const PRODUTOS = [
     nome: 'Romeu e Julieta',
     descricao: 'Mussarela, queijo e Goiabada — o clássico queridinho do Brasil.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 44.99 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 67.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 44.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 67.99 },
     ],
   },
   {
@@ -237,8 +237,8 @@ const PRODUTOS = [
     nome: 'Banana',
     descricao: 'Mussarela, banana, açucar e canela.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 44.99 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 67.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 44.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 67.99 },
     ],
   },
   {
@@ -246,8 +246,8 @@ const PRODUTOS = [
     nome: 'Banana Nevada',
     descricao: 'Uma pitada de mussarela, banana, açucar, canela e chocolate branco.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 54.99 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
     ],
   },
   {
@@ -255,8 +255,8 @@ const PRODUTOS = [
     nome: 'Churros',
     descricao: 'Mussarela, doce de leite, açucar e canela - Trazendo o sabor irresistível do tradicional churros em cada fatia.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 51.99 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 77.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 51.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 77.99 },
     ],
   },
   {
@@ -264,8 +264,8 @@ const PRODUTOS = [
     nome: 'Banoffe',
     descricao: 'Uma pitada de mussarela, banana, açucar, canela e doce de leite.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 51.99 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 77.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 51.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 77.99 },
     ],
   },
   {
@@ -273,8 +273,8 @@ const PRODUTOS = [
     nome: 'Chocolate ao leite',
     descricao: 'Mussarela, chocolate ao leite e confetes coloridos - trazendo uma combinação divertida, cremosa e irresistível.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 51.99 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 77.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 51.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 77.99 },
     ],
   },
   {
@@ -282,8 +282,8 @@ const PRODUTOS = [
     nome: 'Chocoduo',
     descricao: 'uma pitada de mussarela, chocolate ao leite e chocolate branco.',
     variacoes: [
-      { id: 'media', nome: 'Média · 6 fatias', preco: 54.99 },
-      { id: 'grande', nome: 'Grande · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
     ],
   },
 
