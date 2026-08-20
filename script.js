@@ -23,13 +23,13 @@ const CONFIGURACAO = {
    Para um dia fechado, use "null" no lugar de { abre, fecha }.
    Os horários são escritos como "HH:MM" (24 horas). */
 const HORARIO_FUNCIONAMENTO_POR_DIA = {
-  0: { abre: '17:45', fecha: '23:59' }, // domingo
+  0: { abre: '18:00', fecha: '23:59' }, // domingo
   1: null,                              // segunda-feira — fechado
-  2: { abre: '17:40', fecha: '23:00' }, // terça-feira
-  3: { abre: '17:40', fecha: '23:00' }, // quarta-feira
-  4: { abre: '16:40', fecha: '23:00' }, // quinta-feira
-  5: { abre: '17:40', fecha: '23:59' }, // sexta-feira
-  6: { abre: '17:40', fecha: '23:59' }, // sábado
+  2: { abre: '18:00', fecha: '23:00' }, // terça-feira
+  3: { abre: '18:00', fecha: '23:00' }, // quarta-feira
+  4: { abre: '18:00', fecha: '23:00' }, // quinta-feira
+  5: { abre: '18:00', fecha: '23:59' }, // sexta-feira
+  6: { abre: '18:00', fecha: '23:59' }, // sábado
 };
 
 /* =========================================================================
@@ -43,7 +43,7 @@ const CATEGORIAS = [
   { id: 'doces', nome: 'Pizzas Doces', icone: '🍫' },
   { id: 'bordas', nome: 'Bordas Recheadas', icone: '🧀' },
   { id: 'bebidas', nome: 'Bebidas', icone: '🥤' },
-  { id: 'combos', nome: 'Combos', icone: '🍹'},
+  { id: 'combos', nome: 'Combos', icone: '⭐'},
 ];
 
 /* Categorias cujos sabores podem entrar no "Monte sua Pizza". Ficam de
@@ -60,8 +60,8 @@ const PRODUTOS = [
     nome: 'Mussarela',
     descricao: 'Mussarela e orégano',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 44.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 64.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 44.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 64.99 },
     ],
   },  
   {
@@ -69,8 +69,8 @@ const PRODUTOS = [
     nome: 'Calabresa',
     descricao: 'Mussarela, calabresa e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 44.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 64.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 44.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 64.99 },
     ],
   },
   {
@@ -78,8 +78,8 @@ const PRODUTOS = [
     nome: 'Presunto',
     descricao: 'Mussarela, presuntop e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 44.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 64.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 44.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 64.99 },
     ],
   },
 
@@ -89,8 +89,8 @@ const PRODUTOS = [
     nome: 'Portuguesa',
     descricao: 'Mussarela, presunto, calabresa, tomate, pimentão, cebola, palmito, ovo e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 70.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
     ],
   },
   {
@@ -98,8 +98,8 @@ const PRODUTOS = [
     nome: 'Calabresa com cebola',
     descricao: 'Mussarela, calabresa, cebola e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 46.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 66.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 46.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 66.99 },
     ],
   },
   {
@@ -107,8 +107,8 @@ const PRODUTOS = [
     nome: 'Calabresa com Requeijão',
     descricao: 'Mussarela, calabresa, requeijão cremoso e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 69.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 69.99 },
     ],
   },
   {
@@ -116,8 +116,8 @@ const PRODUTOS = [
     nome: 'Frango com Requeijão',
     descricao: 'Mussarela, frango, requeijão cremoso e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 70.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
     ],
   },
   {
@@ -125,8 +125,8 @@ const PRODUTOS = [
     nome: 'Mista',
     descricao: 'Mussarela, presunto, calabresa, tomate, pimentão, cebola, palmito, ovo e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 70.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
     ],
   },
   {
@@ -134,8 +134,8 @@ const PRODUTOS = [
     nome: 'Alho torrado',
     descricao: 'Mussarela, alho torrado e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 70.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
     ],
   },
   {
@@ -143,8 +143,8 @@ const PRODUTOS = [
     nome: 'Peito de Peru',
     descricao: 'Mussarela, peito de peru e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 70.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
     ],
   },
   {
@@ -152,8 +152,8 @@ const PRODUTOS = [
     nome: 'Bacon',
     descricao: 'Mussarela, bacon e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 49.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 70.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 49.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 70.99 },
     ],
   },
   {
@@ -161,8 +161,8 @@ const PRODUTOS = [
     nome: 'Bacon com ovos',
     descricao: 'Mussarela, bacon, ovo e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 51.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 72.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 51.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 72.99 },
     ],
   },
 
@@ -172,8 +172,8 @@ const PRODUTOS = [
     nome: 'Camarão com requeijão',
     descricao: 'Mussarela, camarão, requeijão cremoso e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
     ],
   },
   {
@@ -181,8 +181,8 @@ const PRODUTOS = [
     nome: 'Três porquinhos',
     descricao: 'Mussarela, presunto, calabresa, bacon e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
     ],
   },
   {
@@ -190,8 +190,8 @@ const PRODUTOS = [
     nome: 'Quatro queijos',
     descricao: 'Mussarela, parmesão, provolone, requeijão cremoso e oregano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
     ],
   },
   {
@@ -199,8 +199,8 @@ const PRODUTOS = [
     nome: 'Carne seca',
     descricao: 'Mussarela, carne seca, requeijão cremoso, cebola  e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
     ],
   },
   {
@@ -208,8 +208,8 @@ const PRODUTOS = [
     nome: 'Frango com cheddar e bacon',
     descricao: 'Mussarela, frango, bacon, cheddar e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
     ],
   },
   {
@@ -217,8 +217,8 @@ const PRODUTOS = [
     nome: 'Frango caipira',
     descricao: 'Mussarela, frango, milho, requeijão cremoso e orégano.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
+      { id: 'grande', nome: 'Grande · 6 fatias', preco: 54.99 },
+      { id: 'gigante', nome: 'Gigante · 8 fatias', preco: 80.99 },
     ],
   },
 
@@ -228,8 +228,8 @@ const PRODUTOS = [
     nome: 'Romeu e Julieta',
     descricao: 'Mussarela, queijo e Goiabada — o clássico queridinho do Brasil.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 44.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 67.99 },
+      { id: 'media', nome: 'Média · 6 fatias', preco: 44.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 67.99 },
     ],
   },
   {
@@ -237,8 +237,8 @@ const PRODUTOS = [
     nome: 'Banana',
     descricao: 'Mussarela, banana, açucar e canela.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 44.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 67.99 },
+      { id: 'media', nome: 'Média · 6 fatias', preco: 44.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 67.99 },
     ],
   },
   {
@@ -246,8 +246,8 @@ const PRODUTOS = [
     nome: 'Banana Nevada',
     descricao: 'Uma pitada de mussarela, banana, açucar, canela e chocolate branco.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
+      { id: 'media', nome: 'Média · 6 fatias', preco: 54.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 80.99 },
     ],
   },
   {
@@ -255,8 +255,8 @@ const PRODUTOS = [
     nome: 'Churros',
     descricao: 'Mussarela, doce de leite, açucar e canela - Trazendo o sabor irresistível do tradicional churros em cada fatia.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 51.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 77.99 },
+      { id: 'media', nome: 'Média · 6 fatias', preco: 51.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 77.99 },
     ],
   },
   {
@@ -264,8 +264,8 @@ const PRODUTOS = [
     nome: 'Banoffe',
     descricao: 'Uma pitada de mussarela, banana, açucar, canela e doce de leite.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 51.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 77.99 },
+      { id: 'media', nome: 'Média · 6 fatias', preco: 51.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 77.99 },
     ],
   },
   {
@@ -273,8 +273,8 @@ const PRODUTOS = [
     nome: 'Chocolate ao leite',
     descricao: 'Mussarela, chocolate ao leite e confetes coloridos - trazendo uma combinação divertida, cremosa e irresistível.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 51.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 77.99 },
+      { id: 'media', nome: 'Média · 6 fatias', preco: 51.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 77.99 },
     ],
   },
   {
@@ -282,8 +282,8 @@ const PRODUTOS = [
     nome: 'Chocoduo',
     descricao: 'uma pitada de mussarela, chocolate ao leite e chocolate branco.',
     variacoes: [
-      { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 54.99 },
-      { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 80.99 },
+      { id: 'media', nome: 'Média · 6 fatias', preco: 54.99 },
+      { id: 'grande', nome: 'Grande · 8 fatias', preco: 80.99 },
     ],
   },
 
@@ -733,7 +733,7 @@ function renderizarCartaoProduto(produto) {
    arquivo com o nome certo (ex: imagens/produtos/p01.jpg), a foto passa
    a aparecer sozinha, sem precisar mudar nada no código. */
 function configurarFallbackDeFotos(escopo) {
-  escopo.querySelectorAll('.cartao-produto__foto, .modal-produto__foto').forEach((img) => {
+  escopo.querySelectorAll('.cartao-produto__foto, .modal-produto__foto, .cabecalho__logo-foto, .item-carrinho__foto').forEach((img) => {
     img.onerror = () => {
       img.style.display = 'none';
     };
@@ -1074,6 +1074,7 @@ function configurarFormularioProduto() {
       produtoId: estado.produtoAtual.id,
       nome: estado.produtoAtual.nome,
       emoji: estado.produtoAtual.emoji,
+      fotoId: estado.produtoAtual.id,
       variacaoNome: variacaoNomeCompleta,
       precoUnitario: estado.variacaoSelecionada.preco + precoBorda,
       quantidade: estado.quantidadeSelecionada,
@@ -1306,6 +1307,7 @@ function configurarFormularioMontagem() {
       produtoId: 'monte-sua-pizza',
       nome: 'Monte sua Pizza',
       emoji: '🍕',
+      fotoId: 'monte',
       variacaoNome: variacaoNomeCompleta,
       precoUnitario: precoBase + precoBorda,
       quantidade: estadoMontagem.quantidade,
@@ -1338,9 +1340,13 @@ function atualizarIndicadoresCarrinho() {
 }
  
 function renderizarItemCarrinho(item) {
+  const caminhoFoto = `imagens/produtos/${item.fotoId}.jpg`;
   return `
     <li class="item-carrinho" data-item-id="${item.idItemCarrinho}">
-      <span class="item-carrinho__emoji" aria-hidden="true">${item.emoji}</span>
+      <figure class="item-carrinho__foto-area">
+        <span class="item-carrinho__emoji-fallback" aria-hidden="true">${item.emoji}</span>
+        <img class="item-carrinho__foto" src="${caminhoFoto}" alt="" loading="lazy">
+      </figure>
       <div class="item-carrinho__info">
         <p class="item-carrinho__nome">${item.nome}</p>
         <p class="item-carrinho__variacao">${item.variacaoNome}</p>
@@ -1374,6 +1380,7 @@ function renderizarCarrinho() {
   vazio.classList.add('oculto');
   rodape.classList.remove('oculto');
   lista.innerHTML = estado.carrinho.map(renderizarItemCarrinho).join('');
+  configurarFallbackDeFotos(lista);
  
   lista.querySelectorAll('.item-carrinho').forEach((elementoItem) => {
     const idItem = elementoItem.dataset.itemId;
@@ -1744,11 +1751,14 @@ function inicializarAplicacao() {
   renderizarNavegacaoCategorias();
   renderizarCardapio();
 
-  // A foto do "Monte sua Pizza" vem fixa no HTML desde o início (ao
-  // contrário das outras, que só ganham "src" quando o modal abre) —
-  // por isso conectamos o fallback dela aqui, o quanto antes possível.
+  // A foto do "Monte sua Pizza" e a logo da loja vêm fixas no HTML
+  // desde o início (ao contrário das outras, que só ganham "src" quando
+  // um modal abre) — por isso conectamos o fallback delas aqui, o
+  // quanto antes possível.
   const modalMontarPizza = document.getElementById('modalMontarPizza');
   if (modalMontarPizza) configurarFallbackDeFotos(modalMontarPizza);
+  const cabecalho = document.getElementById('cabecalho');
+  if (cabecalho) configurarFallbackDeFotos(cabecalho);
 
   ajustarMargemDeRolagem();
   window.addEventListener('resize', ajustarMargemDeRolagem);
