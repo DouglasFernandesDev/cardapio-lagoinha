@@ -423,6 +423,19 @@ function normalizarTexto(texto) {
   return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
+/* Escapa um texto digitado pelo cliente antes de inseri-lo em innerHTML
+   (ex: a observacao do pedido). Sem isso, um cliente poderia digitar
+   algo como "<img src=x onerror=...>" no campo de observacao e esse
+   HTML seria interpretado (e executado) quando o carrinho fosse
+   renderizado de volta na tela dele - uma falha de XSS. Criar um
+   elemento e usar textContent/innerHTML e a forma padrao e segura de
+   converter texto livre em HTML ja escapado. */
+function escaparHtml(texto) {
+  const div = document.createElement('div');
+  div.textContent = texto;
+  return div.innerHTML;
+}
+
 /* Converte um texto digitado pelo cliente (ex: "100,00", "1.234,56",
    "100.00", "100") em número. Trata o formato brasileiro corretamente:
    quando há vírgula, qualquer ponto é tratado como separador de milhar
@@ -1357,7 +1370,7 @@ function renderizarItemCarrinho(item) {
       <div class="item-carrinho__info">
         <p class="item-carrinho__nome">${item.nome}</p>
         <p class="item-carrinho__variacao">${item.variacaoNome}</p>
-        ${item.observacao ? `<span class="item-carrinho__obs">📝 ${item.observacao}</span>` : ''}
+        ${item.observacao ? `<span class="item-carrinho__obs">📝 ${escaparHtml(item.observacao)}</span>` : ''}
       </div>
       <span class="item-carrinho__preco">${formatarMoeda(item.precoUnitario * item.quantidade)}</span>
       <div class="item-carrinho__acoes">
