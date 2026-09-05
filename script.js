@@ -78,7 +78,7 @@ const PRODUTOS = [
   {
     id: 'p03', categoriaId: 'tradicionais', emoji: '🍗',
     nome: 'Presunto',
-    descricao: 'Mussarela, presuntop e orégano.',
+    descricao: 'Mussarela, presunto e orégano.',
     variacoes: [
       { id: 'grande', nome: 'Grande 35cm · 6 fatias', preco: 44.99 },
       { id: 'gigante', nome: 'Gigante 45cm · 8 fatias', preco: 64.99 },
