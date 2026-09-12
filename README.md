@@ -40,6 +40,19 @@ Todo o código é **vanilla JS** — decisão deliberada para demonstrar domíni
 
 **Sem dependências. Sem bundler. Sem `npm install`.** Três arquivos (`index.html`, `style.css` + `mobile.css`, `script.js`) rodam em qualquer navegador, direto do disco ou de qualquer hospedagem estática.
 
+```
+cardapio-lagoinha/
+├── index.html          # markup e estrutura da página
+├── style.css           # estilos base (desktop-first do arquivo, com mobile.css cobrindo breakpoints)
+├── mobile.css          # ajustes responsivos
+├── script.js           # toda a lógica: catálogo, carrinho, checkout, WhatsApp
+├── imagens/
+│   ├── logo.jpg
+│   ├── favicon.jpg
+│   └── produtos/       # fotos dos itens do cardápio (fallback automático para emoji)
+└── marketing/          # materiais de divulgação (legendas, descrições para redes sociais)
+```
+
 ---
 
 ## 🏗️ Decisões de arquitetura que valem destacar
@@ -69,10 +82,12 @@ Construído mobile-first, testado em 4 breakpoints (celular, tablet, desktop, de
 Não precisa de servidor nem instalação — é só abrir o `index.html` no navegador.
 
 ```bash
-git clone <url-do-repositorio>
-cd cardapio-pizzaria
+git clone https://github.com/DouglasFernandesDev/cardapio-lagoinha.git
+cd cardapio-lagoinha
 # abra index.html no navegador, ou use um servidor local simples:
 python3 -m http.server 8000
+# ou, com Node instalado:
+npx live-server
 ```
 
 Para configurar para outro negócio, edite apenas o topo do `script.js`:
